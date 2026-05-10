@@ -80,6 +80,8 @@ export const getUserProfile = async (req, res, next) => {
         email: user.email,
         role: user.role,
         avatar: user.avatar,
+        language: user.language,
+        savedDestinations: user.savedDestinations,
       });
     } else {
       res.status(404);
@@ -100,6 +102,8 @@ export const updateUserProfile = async (req, res, next) => {
     if (user) {
       user.name = req.body.name || user.name;
       user.avatar = req.body.avatar || user.avatar;
+      user.language = req.body.language || user.language;
+      user.savedDestinations = req.body.savedDestinations || user.savedDestinations;
 
       // Only update password if provided
       if (req.body.password) {
@@ -114,7 +118,9 @@ export const updateUserProfile = async (req, res, next) => {
         email: updatedUser.email,
         role: updatedUser.role,
         avatar: updatedUser.avatar,
-        token: generateToken(updatedUser._id), // Optionally generate a new token
+        language: updatedUser.language,
+        savedDestinations: updatedUser.savedDestinations,
+        token: generateToken(updatedUser._id),
       });
     } else {
       res.status(404);
@@ -181,6 +187,25 @@ export const resetPassword = async (req, res, next) => {
     await user.save();
 
     res.json({ message: 'Password reset successful' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete user account
+// @route   DELETE /api/auth/profile
+// @access  Private
+export const deleteUserAccount = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      await user.deleteOne();
+      res.json({ message: 'User account deleted successfully' });
+    } else {
+      res.status(404);
+      throw new Error('User not found');
+    }
   } catch (error) {
     next(error);
   }

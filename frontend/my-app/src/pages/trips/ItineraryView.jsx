@@ -66,6 +66,18 @@ const ItineraryView = () => {
     }
   };
 
+  const handleShare = async () => {
+    try {
+      // Automatically make trip public using dedicated share endpoint
+      await tripService.shareTrip(id);
+      const publicUrl = `${window.location.origin}/shared/${id}`;
+      navigator.clipboard.writeText(publicUrl);
+      toast.success('Trip is now public and link copied to clipboard!');
+    } catch (error) {
+      toast.error('Failed to make trip public');
+    }
+  };
+
   if (isLoading) {
     return <div className="flex justify-center items-center h-64"><span className="loading loading-spinner loading-lg text-indigo-600"></span></div>;
   }
@@ -124,7 +136,12 @@ const ItineraryView = () => {
 
             <div className="flex items-center gap-3">
                 <div className="hidden sm:flex gap-1">
-                    <button className="p-4 hover:bg-indigo-50 rounded-2xl text-gray-400 hover:text-indigo-600 transition-all border border-transparent hover:border-indigo-100"><Share2 size={20}/></button>
+                    <button 
+                      onClick={handleShare}
+                      className="p-4 hover:bg-indigo-50 rounded-2xl text-gray-400 hover:text-indigo-600 transition-all border border-transparent hover:border-indigo-100"
+                    >
+                        <Share2 size={20}/>
+                    </button>
                     <button className="p-4 hover:bg-indigo-50 rounded-2xl text-gray-400 hover:text-indigo-600 transition-all border border-transparent hover:border-indigo-100"><Download size={20}/></button>
                 </div>
                 <div className="w-px h-10 bg-gray-100 mx-2 hidden sm:block"></div>

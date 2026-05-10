@@ -25,6 +25,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    language: {
+      type: String,
+      default: 'English',
+    },
+    savedDestinations: [
+      {
+        city: String,
+        country: String,
+        addedAt: { type: Date, default: Date.now }
+      }
+    ],
     resetPasswordToken: String,
     resetPasswordExpires: Date,
   },

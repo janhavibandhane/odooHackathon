@@ -35,7 +35,7 @@ const MyTrips = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Trips</h1>
+          <h1 className="text-4xl font-black text-gray-900 tracking-tighte">My Trips</h1>
           <p className="mt-1 text-sm text-gray-500">Manage and view all your travel itineraries.</p>
         </div>
         <button

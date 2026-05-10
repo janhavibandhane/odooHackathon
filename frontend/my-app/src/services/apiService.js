@@ -37,6 +37,14 @@ export const tripService = {
     const { data } = await api.put(`/trips/${id}/notes`, notesData);
     return data;
   },
+  cloneTrip: async (id) => {
+    const { data } = await api.post(`/trips/${id}/clone`);
+    return data;
+  },
+  shareTrip: async (id) => {
+    const { data } = await api.put(`/trips/${id}/share`);
+    return data;
+  },
 };
 
 export const stopService = {
@@ -80,6 +88,10 @@ export const activityService = {
 export const authService = {
   updateProfile: async (profileData) => {
     const { data } = await api.put('/auth/profile', profileData);
+    return data;
+  },
+  deleteAccount: async () => {
+    const { data } = await api.delete('/auth/profile');
     return data;
   },
   forgotPassword: async (email) => {

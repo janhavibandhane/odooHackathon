@@ -45,7 +45,7 @@ function Navbar({ sidebarId = "my-drawer-4" }) {
   
   return (
     <>
-      <nav className={`sticky top-0 z-50 transition-all duration-500 ${
+      <nav className={`sticky top-0 z-50 shadow-b-xl transition-all duration-500 ${
         isScrolled 
           ? 'bg-white/90 backdrop-blur-md shadow-lg border-b border-gray-100' 
           : 'bg-white border-b border-gray-50'

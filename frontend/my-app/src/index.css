@@ -141,11 +141,39 @@ body {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+/* Custom Toastify Styling */
+.Toastify__toast {
+  @apply rounded-[1.5rem] p-4 shadow-2xl border border-white/20 backdrop-blur-md font-['Outfit'];
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #1e293b !important;
+}
+
+.Toastify__toast--success {
+  border-left: 6px solid #4f46e5 !important;
+}
+
+.Toastify__toast--error {
+  border-left: 6px solid #ef4444 !important;
+}
+
+.Toastify__toast--info {
+  border-left: 6px solid #3b82f6 !important;
+}
+
+.Toastify__toast--warning {
+  border-left: 6px solid #f59e0b !important;
+}
+
+.Toastify__progress-bar {
+  @apply h-1;
+  background: linear-gradient(to right, #6366f1, #a855f7) !important;
+}
+
+.Toastify__close-button {
+  @apply opacity-50 hover:opacity-100 transition-opacity;
+  color: #64748b !important;
+}
+
+.Toastify__toast-icon {
+  @apply w-6 h-6;
 }

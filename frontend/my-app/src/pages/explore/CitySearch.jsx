@@ -5,14 +5,14 @@ import { geminiService } from '../../services/geminiService';
 import { toast } from 'react-toastify';
 
 const MOCK_CITIES = [
-  { id: 1, name: 'Paris', country: 'France', image: 'https://images.unsplash.com/photo-1502602861271-e970a25df600?auto=format&fit=crop&q=80&w=600', rating: 4.8, costIndex: '$$$' },
-  { id: 2, name: 'Tokyo', country: 'Japan', image: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&q=80&w=600', rating: 4.9, costIndex: '$$$' },
-  { id: 3, name: 'Rome', country: 'Italy', image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&q=80&w=600', rating: 4.7, costIndex: '$$' },
-  { id: 4, name: 'New York City', country: 'USA', image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&q=80&w=600', rating: 4.8, costIndex: '$$$$' },
-  { id: 5, name: 'Barcelona', country: 'Spain', image: 'https://images.unsplash.com/photo-1583422409516-15e0a0d4db08?auto=format&fit=crop&q=80&w=600', rating: 4.6, costIndex: '$$' },
-  { id: 6, name: 'Bali', country: 'Indonesia', image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&q=80&w=600', rating: 4.7, costIndex: '$' },
-  { id: 7, name: 'London', country: 'UK', image: 'https://images.unsplash.com/photo-1513635269975-5969336cd753?auto=format&fit=crop&q=80&w=600', rating: 4.6, costIndex: '$$$$' },
-  { id: 8, name: 'Dubai', country: 'UAE', image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&q=80&w=600', rating: 4.5, costIndex: '$$$' },
+  { id: 1, name: 'Mumbai', country: 'India', image: 'https://images.unsplash.com/photo-1570160897545-222a76f254e4?auto=format&fit=crop&q=80&w=1200', rating: 4.7, costIndex: '$$' },
+  { id: 2, name: 'Jaipur', country: 'India', image: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&q=80&w=1200', rating: 4.8, costIndex: '$' },
+  { id: 3, name: 'Goa', country: 'India', image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&q=80&w=1200', rating: 4.6, costIndex: '$$' },
+  { id: 4, name: 'Paris', country: 'France', image: 'https://images.unsplash.com/photo-1502602861271-e970a25df600?auto=format&fit=crop&q=80&w=1200', rating: 4.8, costIndex: '$$$' },
+  { id: 5, name: 'Tokyo', country: 'Japan', image: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&q=80&w=1200', rating: 4.9, costIndex: '$$$' },
+  { id: 6, name: 'New Delhi', country: 'India', image: 'https://images.unsplash.com/photo-1587474260584-1301b4c47fd9?auto=format&fit=crop&q=80&w=1200', rating: 4.5, costIndex: '$$' },
+  { id: 7, name: 'Bali', country: 'Indonesia', image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&q=80&w=1200', rating: 4.7, costIndex: '$' },
+  { id: 8, name: 'Dubai', country: 'UAE', image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&q=80&w=1200', rating: 4.5, costIndex: '$$$' },
 ];
 
 const CitySearch = () => {
@@ -48,7 +48,7 @@ const CitySearch = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">Explore Destinations</h1>
+        <h1 className="text-5xl font-black text-gray-900 tracking-tighte">Explore Destinations</h1>
         <p className="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">Find the perfect city for your next adventure with AI.</p>
         
         <div className="mt-8 max-w-2xl mx-auto">
@@ -71,7 +71,7 @@ const CitySearch = () => {
               {isSearching ? (
                 <span className="loading loading-spinner loading-sm"></span>
               ) : (
-                <span className="flex items-center gap-2"><Sparkles className="w-4 h-4" /> Ask AI</span>
+                <span className="flex items-center gap-2"><Sparkles className="w-4 h-4" /> Search</span>
               )}
             </button>
           </form>
