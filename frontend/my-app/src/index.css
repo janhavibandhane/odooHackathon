@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  @apply bg-base-200 text-base-content antialiased selection:bg-primary selection:bg-opacity-30;
+}
+
+/* Glassmorphism utilities */
+.glass-card {
+  @apply bg-base-100 bg-opacity-70 backdrop-blur-xl border-2 border-gray-100 shadow-2xl;
+}
+
+.glass-panel {
+  @apply bg-base-100 bg-opacity-50 backdrop-blur-md border border-base-content border-opacity-5;
+}
+
+/* Custom Gradients */
+.bg-gradient-radial {
+  background-image: radial-gradient(var(--tw-gradient-stops));
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(168,85,247,0.1) 100%);
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-base-content bg-opacity-20 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-base-content bg-opacity-40;
+}
+
+
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #6366f1, #a855f7);
+  border-radius: 10px;
+}
+
+/* Button Styles */
+.btn-navbar-mobile {
+  @apply btn btn-ghost btn-sm text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-300 rounded-xl;
+}
+
+.btn-navbar-icon {
+  @apply btn btn-ghost btn-sm gap-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-300 rounded-xl;
+}
+
+.btn-profile {
+  @apply flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-300 cursor-pointer hover:bg-gray-50;
+}
+
+/* Notification Badge */
+.badge-notification {
+  @apply absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg;
+}
+
+/* Menu Items */
+.notification-item {
+  @apply flex items-start gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 cursor-pointer;
+}
+
+.profile-menu-item {
+  @apply flex items-center gap-3 px-3 py-2 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all duration-200;
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
