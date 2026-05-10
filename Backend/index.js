@@ -7,6 +7,7 @@ import dashboardRoutes from './src/routes/dashboard.routes.js';
 import tripRoutes from './src/routes/tripRoutes.js';
 import stopRoutes from './src/routes/stopRoutes.js';
 import activityRoutes from './src/routes/activityRoutes.js';
+import aiRoutes from './src/routes/aiRoutes.js';
 import { notFound, errorHandler } from './src/middleware/errorHandler.js';
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.use("/api/trips", tripRoutes);
 app.use("/api/trips/:tripId/stops", stopRoutes);
 app.use("/api/stops/:stopId/activities", activityRoutes);
 app.use("/api/activities", activityRoutes); // For delete which uses /api/activities/:id
+app.use("/api/ai", aiRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is running...");
