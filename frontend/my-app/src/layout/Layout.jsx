@@ -10,7 +10,7 @@ function Layout() {
     <div className="drawer lg:drawer-open">
       <input id={sidebarId} type="checkbox" className="drawer-toggle" />
       
-      <div className="drawer-content flex flex-col min-h-screen bg-[#FAF9FF]">
+      <div className="drawer-content flex flex-col min-h-screen bg-[#efedf7]">
         <Navbar sidebarId={sidebarId} />
         <main className="flex-1 pl-10 pr-10">
           <Outlet />

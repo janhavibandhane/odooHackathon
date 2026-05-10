@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useParams } from 'react-router-dom';
-import { Calendar, DollarSign, Package, BookOpen } from 'lucide-react';
+import { Calendar, DollarSign, Package, BookOpen, Layout } from 'lucide-react';
 
 const TripTabs = () => {
   const { id } = useParams();
@@ -13,9 +13,9 @@ const TripTabs = () => {
   ];
 
   return (
-    <div className="border-b border-gray-200 bg-white mb-6 sticky top-0 z-20">
-      <div className="max-w-4xl mx-auto px-4">
-        <nav className="-mb-px flex space-x-8 overflow-x-auto no-scrollbar" aria-label="Tabs">
+    <div className="bg-white/80 backdrop-blur-md border-1 border-gray-200 rounded-lg m-2  shadow-xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav className="flex justify-center sm:justify-start space-x-2 sm:space-x-8 overflow-x-auto no-scrollbar" aria-label="Tabs">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -23,14 +23,16 @@ const TripTabs = () => {
                 key={tab.name}
                 to={tab.path}
                 className={({ isActive }) =>
-                  `whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
+                  `group whitespace-nowrap py-5 px-4 border-b-4 font-black text-xs uppercase tracking-widest flex items-center gap-2.5 transition-all ${
                     isActive
-                      ? 'border-indigo-500 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-indigo-600 text-indigo-600'
+                      : 'border-transparent text-gray-400 hover:text-gray-900 hover:border-gray-200'
                   }`
                 }
               >
-                <Icon className="w-4 h-4" />
+                <div className={({ isActive }) => `p-1.5 rounded-lg transition-all ${isActive ? 'bg-indigo-50 text-indigo-600' : 'bg-transparent group-hover:bg-gray-50'}`}>
+                    <Icon className="w-4 h-4" />
+                </div>
                 {tab.name}
               </NavLink>
             );

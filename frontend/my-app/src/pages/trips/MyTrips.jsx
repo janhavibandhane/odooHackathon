@@ -89,9 +89,9 @@ const MyTrips = () => {
                 <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                   <button
                     onClick={() => navigate(`/trips/${trip._id}/builder`)}
-                    className="text-sm font-medium text-indigo-600 hover:text-indigo-900"
+                    className="btn btn-primary btn-sm btn-outline hover:bg-indigo-600 border-indigo-600 text-indigo-600"
                   >
-                    Edit Itinerary
+                    Manage Plan
                   </button>
                   <div className="flex items-center gap-4">
                     <button

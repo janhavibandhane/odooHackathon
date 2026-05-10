@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -15,8 +17,8 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  @apply bg-base-200 text-base-content antialiased selection:bg-primary selection:bg-opacity-30;
+  font-family: 'Outfit', sans-serif;
+  @apply bg-base-200 text-base-content antialiased selection:bg-indigo-600 selection:bg-opacity-30;
 }
 
 /* Glassmorphism utilities */

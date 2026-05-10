@@ -127,7 +127,18 @@ const Home = () => {
                     <div className="w-full bg-gray-100 rounded-full h-2">
                       <div className="bg-indigo-500 h-2 rounded-full" style={{ width: '25%' }}></div>
                     </div>
-                    <p className="text-xs text-gray-400 mt-2 text-right">Planning Progress</p>
+                    <div className="flex justify-between items-center mt-3">
+                      <p className="text-xs text-gray-400">Planning Progress</p>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/trips/${trip._id}/builder`);
+                        }}
+                        className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1"
+                      >
+                        Edit Plan <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
