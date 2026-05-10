@@ -15,11 +15,13 @@ import {
   DollarSign,
   Info,
   Layout,
-  Flag
+  Flag,
+  Check
 } from 'lucide-react';
 
 import { tripService, stopService, activityService } from '../../services/apiService';
 import TripTabs from '../../components/trips/TripTabs';
+import { generateMockActivities } from '../../utils/mockData';
 
 const ItineraryBuilder = () => {
   const { id } = useParams();
@@ -38,6 +40,12 @@ const ItineraryBuilder = () => {
   const [activities, setActivities] = useState({}); // { stopId: [activities] }
   const [showActivityForm, setShowActivityForm] = useState(false);
   const [newActivity, setNewActivity] = useState({ title: '', type: 'Sightseeing', cost: 0, duration: 60, description: '' });
+
+  // Catalog states
+  const [viewMode, setViewMode] = useState('browse');
+  const [filterType, setFilterType] = useState('All');
+  const [filterCost, setFilterCost] = useState('All');
+  const [filterDuration, setFilterDuration] = useState('All');
 
   useEffect(() => {
     fetchTripData();
@@ -148,9 +156,44 @@ const ItineraryBuilder = () => {
     }
   };
 
+  const handleAddCatalogActivity = async (mockActivity) => {
+    try {
+      const addedActivity = await activityService.createActivity(activeStopId, {
+        title: mockActivity.title,
+        type: mockActivity.type,
+        cost: mockActivity.cost,
+        duration: mockActivity.duration,
+        description: mockActivity.description
+      });
+      setActivities({
+        ...activities,
+        [activeStopId]: [...(activities[activeStopId] || []), addedActivity]
+      });
+      toast.success('Activity added from catalog!');
+    } catch (error) {
+      toast.error(error.message || 'Failed to add activity');
+    }
+  };
+
   if (isLoading) return <div className="flex justify-center items-center h-screen bg-gray-50"><span className="loading loading-spinner loading-lg text-indigo-600"></span></div>;
 
   const activeStop = stops.find(s => s._id === activeStopId);
+
+  const catalogActivities = activeStop ? generateMockActivities(activeStop.city) : [];
+  const filteredCatalog = catalogActivities.filter(item => {
+    if (filterType !== 'All' && item.type !== filterType) return false;
+    if (filterCost !== 'All') {
+      if (filterCost === '$' && item.cost >= 50) return false;
+      if (filterCost === '$$' && (item.cost < 50 || item.cost >= 100)) return false;
+      if (filterCost === '$$$' && item.cost < 100) return false;
+    }
+    if (filterDuration !== 'All') {
+      if (filterDuration === 'Short' && item.duration >= 120) return false;
+      if (filterDuration === 'Half-Day' && (item.duration < 120 || item.duration > 240)) return false;
+      if (filterDuration === 'Full-Day' && item.duration <= 240) return false;
+    }
+    return true;
+  });
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -270,48 +313,123 @@ const ItineraryBuilder = () => {
 
                 {showActivityForm && (
                   <div className="mb-12 bg-gray-50 rounded-[2rem] p-8 border border-gray-100 shadow-inner animate-in fade-in slide-in-from-top-6 duration-500">
-                    <h3 className="text-lg font-black text-gray-900 mb-6">Plan an Event</h3>
-                    <form onSubmit={handleAddActivity} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Title</label>
-                          <input required type="text" className="w-full bg-white border-2 border-transparent focus:border-indigo-100 rounded-2xl px-5 py-4 text-sm font-bold outline-none transition-all shadow-sm" value={newActivity.title} onChange={e => setNewActivity({...newActivity, title: e.target.value})} placeholder="e.g. Visit the Eiffel Tower" />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Type</label>
-                          <select className="w-full bg-white border-2 border-transparent focus:border-indigo-100 rounded-2xl px-5 py-4 text-sm font-bold outline-none transition-all shadow-sm" value={newActivity.type} onChange={e => setNewActivity({...newActivity, type: e.target.value})}>
-                            <option>Sightseeing</option>
-                            <option>Food</option>
-                            <option>Adventure</option>
-                            <option>Relaxation</option>
-                            <option>Transport</option>
-                            <option>Other</option>
+                    <div className="flex items-center justify-between mb-8">
+                      <h3 className="text-xl font-black text-gray-900">Discover & Plan</h3>
+                      <div className="flex items-center gap-1 bg-gray-200 p-1.5 rounded-[1rem]">
+                        <button onClick={() => setViewMode('browse')} className={`px-5 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${viewMode === 'browse' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}>Catalog</button>
+                        <button onClick={() => setViewMode('custom')} className={`px-5 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${viewMode === 'custom' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}>Custom</button>
+                      </div>
+                    </div>
+
+                    {viewMode === 'browse' ? (
+                      <div>
+                        <div className="flex flex-wrap gap-4 mb-6 pb-6 border-b border-gray-200">
+                          <select className="bg-white border-2 border-transparent focus:border-indigo-100 rounded-xl px-4 py-2 text-xs font-bold outline-none shadow-sm" value={filterType} onChange={e => setFilterType(e.target.value)}>
+                            <option value="All">All Types</option>
+                            <option value="Sightseeing">Sightseeing</option>
+                            <option value="Food">Food</option>
+                            <option value="Adventure">Adventure</option>
+                            <option value="Relaxation">Relaxation</option>
+                            <option value="Transport">Transport</option>
+                          </select>
+                          <select className="bg-white border-2 border-transparent focus:border-indigo-100 rounded-xl px-4 py-2 text-xs font-bold outline-none shadow-sm" value={filterCost} onChange={e => setFilterCost(e.target.value)}>
+                            <option value="All">Any Price</option>
+                            <option value="$">$ (Under $50)</option>
+                            <option value="$$">$$ ($50 - $99)</option>
+                            <option value="$$$">$$$ ($100+)</option>
+                          </select>
+                          <select className="bg-white border-2 border-transparent focus:border-indigo-100 rounded-xl px-4 py-2 text-xs font-bold outline-none shadow-sm" value={filterDuration} onChange={e => setFilterDuration(e.target.value)}>
+                            <option value="All">Any Duration</option>
+                            <option value="Short">Short (&lt; 2h)</option>
+                            <option value="Half-Day">Half-Day (2h - 4h)</option>
+                            <option value="Full-Day">Full-Day (&gt; 4h)</option>
                           </select>
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Estimated Cost ($)</label>
-                          <div className="relative">
-                            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 font-black">$</div>
-                            <input type="number" min="0" className="w-full bg-white border-2 border-transparent focus:border-indigo-100 rounded-2xl pl-10 pr-5 py-4 text-sm font-bold outline-none transition-all shadow-sm" value={newActivity.cost} onChange={e => setNewActivity({...newActivity, cost: Number(e.target.value)})} />
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {filteredCatalog.map(item => {
+                            const isAdded = activities[activeStopId]?.some(a => a.title === item.title);
+                            return (
+                              <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all group flex flex-col">
+                                <div className="h-40 w-full relative overflow-hidden">
+                                  <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest text-indigo-600">
+                                    {item.type}
+                                  </div>
+                                </div>
+                                <div className="p-5 flex flex-col flex-1">
+                                  <h4 className="font-black text-gray-900 text-lg mb-2 leading-tight">{item.title}</h4>
+                                  <p className="text-xs text-gray-400 font-bold line-clamp-2 mb-4 flex-1">{item.description}</p>
+                                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
+                                    <div className="flex items-center gap-4 text-xs font-black text-gray-400">
+                                      <span className="flex items-center gap-1"><Clock size={14} className="text-indigo-300"/> {item.duration}m</span>
+                                      <span className="flex items-center gap-1"><DollarSign size={14} className="text-green-400"/> ${item.cost}</span>
+                                    </div>
+                                    <button 
+                                      onClick={() => isAdded ? null : handleAddCatalogActivity(item)}
+                                      disabled={isAdded}
+                                      className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isAdded ? 'bg-green-50 text-green-500 cursor-not-allowed' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white'}`}
+                                    >
+                                      {isAdded ? <Check size={16}/> : <Plus size={16}/>}
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {filteredCatalog.length === 0 && (
+                            <div className="col-span-full py-12 text-center text-gray-400 font-bold text-sm">
+                              No activities match your filters.
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex justify-end pt-6 mt-6 border-t border-gray-200">
+                          <button type="button" onClick={() => setShowActivityForm(false)} className="px-8 py-3 text-xs font-black text-gray-400 hover:bg-white rounded-2xl transition-all uppercase tracking-widest">Close</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleAddActivity} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Title</label>
+                            <input required type="text" className="w-full bg-white border-2 border-transparent focus:border-indigo-100 rounded-2xl px-5 py-4 text-sm font-bold outline-none transition-all shadow-sm" value={newActivity.title} onChange={e => setNewActivity({...newActivity, title: e.target.value})} placeholder="e.g. Visit the Eiffel Tower" />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Type</label>
+                            <select className="w-full bg-white border-2 border-transparent focus:border-indigo-100 rounded-2xl px-5 py-4 text-sm font-bold outline-none transition-all shadow-sm" value={newActivity.type} onChange={e => setNewActivity({...newActivity, type: e.target.value})}>
+                              <option>Sightseeing</option>
+                              <option>Food</option>
+                              <option>Adventure</option>
+                              <option>Relaxation</option>
+                              <option>Transport</option>
+                              <option>Other</option>
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Estimated Cost ($)</label>
+                            <div className="relative">
+                              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 font-black">$</div>
+                              <input type="number" min="0" className="w-full bg-white border-2 border-transparent focus:border-indigo-100 rounded-2xl pl-10 pr-5 py-4 text-sm font-bold outline-none transition-all shadow-sm" value={newActivity.cost} onChange={e => setNewActivity({...newActivity, cost: Number(e.target.value)})} />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Duration (Min)</label>
+                            <div className="relative">
+                              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 font-black"><Clock size={16}/></div>
+                              <input type="number" min="0" step="15" className="w-full bg-white border-2 border-transparent focus:border-indigo-100 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold outline-none transition-all shadow-sm" value={newActivity.duration} onChange={e => setNewActivity({...newActivity, duration: Number(e.target.value)})} />
+                            </div>
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Duration (Min)</label>
-                          <div className="relative">
-                            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 font-black"><Clock size={16}/></div>
-                            <input type="number" min="0" step="15" className="w-full bg-white border-2 border-transparent focus:border-indigo-100 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold outline-none transition-all shadow-sm" value={newActivity.duration} onChange={e => setNewActivity({...newActivity, duration: Number(e.target.value)})} />
-                          </div>
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Notes / Description</label>
+                          <textarea className="w-full bg-white border-2 border-transparent focus:border-indigo-100 rounded-2xl px-5 py-4 text-sm font-bold outline-none transition-all shadow-sm min-h-[120px]" value={newActivity.description} onChange={e => setNewActivity({...newActivity, description: e.target.value})} placeholder="Any specific details or booking info..."></textarea>
                         </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Notes / Description</label>
-                        <textarea className="w-full bg-white border-2 border-transparent focus:border-indigo-100 rounded-2xl px-5 py-4 text-sm font-bold outline-none transition-all shadow-sm min-h-[120px]" value={newActivity.description} onChange={e => setNewActivity({...newActivity, description: e.target.value})} placeholder="Any specific details or booking info..."></textarea>
-                      </div>
-                      <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                        <button type="button" onClick={() => setShowActivityForm(false)} className="px-8 py-3 text-xs font-black text-gray-400 hover:bg-white rounded-2xl transition-all uppercase tracking-widest">Discard</button>
-                        <button type="submit" className="px-10 py-3 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100">Confirm Event</button>
-                      </div>
-                    </form>
+                        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                          <button type="button" onClick={() => setShowActivityForm(false)} className="px-8 py-3 text-xs font-black text-gray-400 hover:bg-white rounded-2xl transition-all uppercase tracking-widest">Discard</button>
+                          <button type="submit" className="px-10 py-3 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100">Confirm Event</button>
+                        </div>
+                      </form>
+                    )}
                   </div>
                 )}
 

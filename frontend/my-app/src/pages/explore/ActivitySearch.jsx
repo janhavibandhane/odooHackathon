@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Clock, DollarSign, Filter, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { geminiService } from '../../services/geminiService';
+import { tripService, stopService, activityService } from '../../services/apiService';
 import { toast } from 'react-toastify';
 
 const MOCK_ACTIVITIES = [
@@ -19,6 +20,15 @@ const ActivitySearch = () => {
   const [activities, setActivities] = useState(MOCK_ACTIVITIES);
   const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
+
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activityToAdd, setActivityToAdd] = useState(null);
+  const [myTrips, setMyTrips] = useState([]);
+  const [selectedTripId, setSelectedTripId] = useState('');
+  const [tripStops, setTripStops] = useState([]);
+  const [selectedStopId, setSelectedStopId] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -46,6 +56,65 @@ const ActivitySearch = () => {
       setIsSearching(false);
     }
   };
+
+  const handleOpenAddModal = async (activity) => {
+    setActivityToAdd(activity);
+    setIsModalOpen(true);
+    try {
+      const trips = await tripService.getMyTrips();
+      setMyTrips(trips);
+      if (trips.length > 0) {
+        setSelectedTripId(trips[0]._id);
+        loadStopsForTrip(trips[0]._id);
+      }
+    } catch (error) {
+      toast.error("Failed to load trips");
+    }
+  };
+
+  const loadStopsForTrip = async (tripId) => {
+    try {
+      const stops = await stopService.getStopsForTrip(tripId);
+      setTripStops(stops);
+      if (stops.length > 0) {
+        setSelectedStopId(stops[0]._id);
+      } else {
+        setSelectedStopId('');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleTripChange = (e) => {
+    const tId = e.target.value;
+    setSelectedTripId(tId);
+    loadStopsForTrip(tId);
+  };
+
+  const handleConfirmAdd = async () => {
+    if (!selectedStopId) return toast.error("Please select a destination stop.");
+    setIsAdding(true);
+    try {
+      await activityService.createActivity(selectedStopId, {
+        title: activityToAdd.title,
+        type: activityToAdd.type,
+        cost: activityToAdd.cost || 0,
+        duration: activityToAdd.duration || 60,
+        description: activityToAdd.description || ''
+      });
+      toast.success("Activity added successfully!");
+      setIsModalOpen(false);
+    } catch (error) {
+      toast.error(error.message || "Failed to add activity");
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const displayedActivities = selectedCategory === 'All' 
+    ? activities 
+    : activities.filter(a => a.type?.toLowerCase().includes(selectedCategory.toLowerCase()));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -110,7 +179,7 @@ const ActivitySearch = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {activities.map((activity, index) => (
+          {displayedActivities.map((activity, index) => (
             <div key={activity.id || index} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
               <div className="h-48 w-full relative bg-gray-200">
                 <img src={activity.image || "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=600"} alt={activity.title} className="w-full h-full object-cover" />
@@ -138,7 +207,7 @@ const ActivitySearch = () => {
                     <DollarSign className="w-4 h-4 text-gray-500" />{activity.cost}
                   </div>
                   <button 
-                    onClick={() => navigate('/trips')}
+                    onClick={() => handleOpenAddModal(activity)}
                     className="text-sm font-medium text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1.5 rounded-md hover:bg-indigo-100 transition-colors"
                   >
                     Add to Trip
@@ -150,11 +219,11 @@ const ActivitySearch = () => {
         </div>
       )}
       
-      {!isSearching && activities.length === 0 && (
+      {!isSearching && displayedActivities.length === 0 && (
         <div className="text-center py-12 bg-white rounded-xl border border-gray-200 mt-4">
           <Search className="mx-auto h-12 w-12 text-gray-300 mb-4" />
           <h3 className="text-lg font-medium text-gray-900">No activities found</h3>
-          <p className="mt-1 text-gray-500">Try asking AI for recommendations.</p>
+          <p className="mt-1 text-gray-500">Try selecting a different category or searching.</p>
           <button 
             onClick={() => {setSearchTerm(''); setSelectedCategory('All');}}
             className="mt-4 text-indigo-600 font-medium hover:text-indigo-800"
@@ -162,6 +231,57 @@ const ActivitySearch = () => {
             Clear all filters
           </button>
         </div>
+      )}
+
+      {/* Add Modal */}
+      {isModalOpen && (
+        <dialog open className="modal modal-open bg-black/40 backdrop-blur-sm">
+          <div className="modal-box bg-white rounded-3xl p-8 max-w-md">
+            <h3 className="font-black text-2xl text-gray-900 mb-2">Add to Trip</h3>
+            <p className="text-gray-500 font-medium text-sm mb-6">Choose where you'd like to add <span className="text-indigo-600 font-bold">{activityToAdd?.title}</span>.</p>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select Trip</label>
+                <select 
+                  className="w-full bg-gray-50 border-2 border-transparent focus:border-indigo-100 rounded-xl px-4 py-3 text-sm font-bold outline-none transition-all shadow-sm mt-1"
+                  value={selectedTripId}
+                  onChange={handleTripChange}
+                >
+                  <option value="" disabled>Select a trip</option>
+                  {myTrips.map(t => <option key={t._id} value={t._id}>{t.title}</option>)}
+                </select>
+                {myTrips.length === 0 && <p className="text-xs text-red-500 mt-1">You don't have any trips yet.</p>}
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Select Destination (Stop)</label>
+                <select 
+                  className="w-full bg-gray-50 border-2 border-transparent focus:border-indigo-100 rounded-xl px-4 py-3 text-sm font-bold outline-none transition-all shadow-sm mt-1 disabled:opacity-50"
+                  value={selectedStopId}
+                  onChange={e => setSelectedStopId(e.target.value)}
+                  disabled={!selectedTripId || tripStops.length === 0}
+                >
+                  <option value="" disabled>Select a destination</option>
+                  {tripStops.map(s => <option key={s._id} value={s._id}>{s.city}, {s.country}</option>)}
+                </select>
+                {selectedTripId && tripStops.length === 0 && <p className="text-xs text-orange-500 mt-1">This trip has no destinations. Please add a destination to the trip first.</p>}
+              </div>
+            </div>
+
+            <div className="modal-action mt-8 flex gap-3">
+              <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-ghost flex-1 rounded-xl">Cancel</button>
+              <button 
+                type="button" 
+                onClick={handleConfirmAdd} 
+                disabled={isAdding || !selectedStopId}
+                className="btn btn-primary flex-1 rounded-xl bg-indigo-600 hover:bg-indigo-700 border-none text-white font-bold disabled:opacity-50"
+              >
+                {isAdding ? <span className="loading loading-spinner loading-xs"></span> : 'Add Activity'}
+              </button>
+            </div>
+          </div>
+        </dialog>
       )}
     </div>
   );

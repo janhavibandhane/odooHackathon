@@ -20,7 +20,7 @@ import {
   Info
 } from 'lucide-react';
 
-import { tripService } from '../../services/apiService';
+import { tripService, stopService, activityService } from '../../services/apiService';
 import TripTabs from '../../components/trips/TripTabs';
 
 const ItineraryView = () => {
@@ -38,8 +38,27 @@ const ItineraryView = () => {
 
   const fetchTrip = async () => {
     try {
-      const data = await tripService.getTripById(id);
-      setTrip(data);
+      const tripData = await tripService.getTripById(id);
+      
+      try {
+        const stopsData = await stopService.getStopsForTrip(id);
+        
+        const stopsWithActivities = await Promise.all(stopsData.map(async (stop) => {
+          try {
+            const activities = await activityService.getActivitiesForStop(stop._id);
+            return { ...stop, activities };
+          } catch (err) {
+            return { ...stop, activities: [] };
+          }
+        }));
+        
+        tripData.stops = stopsWithActivities;
+      } catch (err) {
+        tripData.stops = [];
+        console.error("Failed to load stops or activities", err);
+      }
+
+      setTrip(tripData);
     } catch (error) {
       toast.error(error.message || 'Failed to fetch trip data');
     } finally {
@@ -188,7 +207,7 @@ const ItineraryView = () => {
                                                                     <span className="text-[10px] font-black text-indigo-500 bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-100 uppercase tracking-widest">{activity.type || 'Activity'}</span>
                                                                 </div>
                                                             </div>
-                                                            <h4 className="text-lg font-black text-gray-900 mb-2 leading-tight">{activity.name}</h4>
+                                                            <h4 className="text-lg font-black text-gray-900 mb-2 leading-tight">{activity.title}</h4>
                                                             <p className="text-xs text-gray-400 font-bold line-clamp-2 mb-6 leading-relaxed flex-1">{activity.description || 'Enjoy the local scenery and culture.'}</p>
                                                             
                                                             <div className="flex items-center justify-between pt-4 border-t border-gray-100">
@@ -279,7 +298,7 @@ const ItineraryView = () => {
                                         <div className="flex items-center gap-6">
                                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-indigo-500 shadow-sm border border-gray-100 group-hover/item:bg-indigo-600 group-hover/item:text-white transition-all"><Navigation size={20}/></div>
                                             <div>
-                                                <h4 className="font-black text-lg text-gray-800 leading-none mb-1">{activity.name}</h4>
+                                                <h4 className="font-black text-lg text-gray-800 leading-none mb-1">{activity.title}</h4>
                                                 <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{activity.type}</span>
                                             </div>
                                         </div>
