@@ -12,7 +12,7 @@ import {
   ChevronDown, 
   Navigation,
   Clock,
-  DollarSign,
+  IndianRupee,
   Info,
   Layout,
   Flag,
@@ -183,9 +183,9 @@ const ItineraryBuilder = () => {
   const filteredCatalog = catalogActivities.filter(item => {
     if (filterType !== 'All' && item.type !== filterType) return false;
     if (filterCost !== 'All') {
-      if (filterCost === '$' && item.cost >= 50) return false;
-      if (filterCost === '$$' && (item.cost < 50 || item.cost >= 100)) return false;
-      if (filterCost === '$$$' && item.cost < 100) return false;
+      if (filterCost === '₹' && item.cost >= 1000) return false;
+      if (filterCost === '₹₹' && (item.cost < 1000 || item.cost >= 3000)) return false;
+      if (filterCost === '₹₹₹' && item.cost < 3000) return false;
     }
     if (filterDuration !== 'All') {
       if (filterDuration === 'Short' && item.duration >= 120) return false;
@@ -239,7 +239,7 @@ const ItineraryBuilder = () => {
                     <h3 className="text-xs font-black text-indigo-900 uppercase tracking-widest mb-4">Add Destination</h3>
                     <form onSubmit={handleAddStop} className="space-y-4">
                         <input required type="text" placeholder="City Name" className="w-full bg-white border-2 border-transparent focus:border-indigo-200 rounded-xl px-4 py-3 text-sm font-bold outline-none transition-all" value={newStop.city} onChange={e => setNewStop({...newStop, city: e.target.value})} />
-                        <input required type="text" placeholder="Country" className="w-full bg-white border-2 border-transparent focus:border-indigo-200 rounded-xl px-4 py-3 text-sm font-bold outline-none transition-all" value={newStop.country} onChange={e => setNewStop({...newStop, country: e.target.value})} />
+                        <input required type="text" placeholder="State" className="w-full bg-white border-2 border-transparent focus:border-indigo-200 rounded-xl px-4 py-3 text-sm font-bold outline-none transition-all" value={newStop.country} onChange={e => setNewStop({...newStop, country: e.target.value})} />
                         <div className="grid grid-cols-2 gap-2">
                             <input required type="date" className="bg-white border-2 border-transparent focus:border-indigo-200 rounded-xl px-3 py-3 text-xs font-bold outline-none transition-all" value={newStop.arrivalDate} onChange={e => setNewStop({...newStop, arrivalDate: e.target.value})} />
                             <input required type="date" className="bg-white border-2 border-transparent focus:border-indigo-200 rounded-xl px-3 py-3 text-xs font-bold outline-none transition-all" value={newStop.departureDate} onChange={e => setNewStop({...newStop, departureDate: e.target.value})} />
@@ -334,9 +334,9 @@ const ItineraryBuilder = () => {
                           </select>
                           <select className="bg-white border-2 border-transparent focus:border-indigo-100 rounded-xl px-4 py-2 text-xs font-bold outline-none shadow-sm" value={filterCost} onChange={e => setFilterCost(e.target.value)}>
                             <option value="All">Any Price</option>
-                            <option value="$">$ (Under $50)</option>
-                            <option value="$$">$$ ($50 - $99)</option>
-                            <option value="$$$">$$$ ($100+)</option>
+                            <option value="₹">₹ (Under ₹1000)</option>
+                            <option value="₹₹">₹₹ (₹1000 - ₹2999)</option>
+                            <option value="₹₹₹">₹₹₹ (₹3000+)</option>
                           </select>
                           <select className="bg-white border-2 border-transparent focus:border-indigo-100 rounded-xl px-4 py-2 text-xs font-bold outline-none shadow-sm" value={filterDuration} onChange={e => setFilterDuration(e.target.value)}>
                             <option value="All">Any Duration</option>
@@ -363,7 +363,7 @@ const ItineraryBuilder = () => {
                                   <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
                                     <div className="flex items-center gap-4 text-xs font-black text-gray-400">
                                       <span className="flex items-center gap-1"><Clock size={14} className="text-indigo-300"/> {item.duration}m</span>
-                                      <span className="flex items-center gap-1"><DollarSign size={14} className="text-green-400"/> ${item.cost}</span>
+                                      <span className="flex items-center gap-1"><IndianRupee size={14} className="text-green-400"/> {item.cost}</span>
                                     </div>
                                     <button 
                                       onClick={() => isAdded ? null : handleAddCatalogActivity(item)}
@@ -406,9 +406,9 @@ const ItineraryBuilder = () => {
                             </select>
                           </div>
                           <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Estimated Cost ($)</label>
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Estimated Cost (₹)</label>
                             <div className="relative">
-                              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 font-black">$</div>
+                              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 font-black">₹</div>
                               <input type="number" min="0" className="w-full bg-white border-2 border-transparent focus:border-indigo-100 rounded-2xl pl-10 pr-5 py-4 text-sm font-bold outline-none transition-all shadow-sm" value={newActivity.cost} onChange={e => setNewActivity({...newActivity, cost: Number(e.target.value)})} />
                             </div>
                           </div>
@@ -450,7 +450,7 @@ const ItineraryBuilder = () => {
                                 <Clock size={14} className="text-indigo-300"/> {activity.duration} MIN
                               </div>
                               <div className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest">
-                                <DollarSign size={14} className="text-green-400"/> ${activity.cost}
+                                <IndianRupee size={14} className="text-green-400"/> {activity.cost}
                               </div>
                             </div>
                           </div>

@@ -1,13 +1,13 @@
 import React from 'react';
 import { NavLink, useParams } from 'react-router-dom';
-import { Calendar, DollarSign, Package, BookOpen, Layout } from 'lucide-react';
+import { Calendar, IndianRupee, Package, BookOpen, Layout } from 'lucide-react';
 
 const TripTabs = () => {
   const { id } = useParams();
 
   const tabs = [
     { name: 'Itinerary', path: `/trips/${id}/view`, icon: Calendar },
-    { name: 'Budget', path: `/trips/${id}/budget`, icon: DollarSign },
+    { name: 'Budget', path: `/trips/${id}/budget`, icon: IndianRupee },
     { name: 'Packing', path: `/trips/${id}/packing`, icon: Package },
     { name: 'Journal', path: `/trips/${id}/journal`, icon: BookOpen },
   ];

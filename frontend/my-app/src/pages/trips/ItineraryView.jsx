@@ -15,7 +15,7 @@ import {
   ChevronRight,
   Plane,
   Edit3,
-  DollarSign,
+  IndianRupee,
   Layers,
   Info
 } from 'lucide-react';
@@ -97,7 +97,7 @@ const ItineraryView = () => {
                 <div className="flex flex-wrap justify-center items-center gap-4 text-xs font-black uppercase tracking-widest text-indigo-100">
                     <div className="flex items-center gap-2 px-6 py-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10"><Calendar size={18} className="text-indigo-400"/> {new Date(trip.startDate).toLocaleDateString()} - {new Date(trip.endDate).toLocaleDateString()}</div>
                     <div className="flex items-center gap-2 px-6 py-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10"><MapPin size={18} className="text-indigo-400"/> {trip.stops?.length || 0} Cities</div>
-                    <div className="flex items-center gap-2 px-6 py-3 bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-900/50"><DollarSign size={18}/> Total Est: ${totalCost}</div>
+                    <div className="flex items-center gap-2 px-6 py-3 bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-900/50"><IndianRupee size={18}/> Total Est: ₹{totalCost}</div>
                 </div>
             </div>
         </div>
@@ -169,7 +169,7 @@ const ItineraryView = () => {
                                             </div>
                                             <div>
                                                 <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] block mb-1">Destination Header</span>
-                                                <h2 className="text-5xl font-black text-gray-900 tracking-tighter">{stop.city}</h2>
+                                                <h2 className="text-5xl font-black text-gray-900 tracking-tighter">{stop.city}{stop.country ? `, ${stop.country}` : ''}</h2>
                                             </div>
                                         </div>
 
@@ -215,7 +215,7 @@ const ItineraryView = () => {
                                                                     <Clock size={14} className="text-indigo-400"/> {activity.duration || 60} MIN
                                                                 </div>
                                                                 <div className="flex items-center gap-1 text-sm font-black text-gray-900">
-                                                                    <span className="text-xs text-green-500">$</span>{activity.cost || 0}
+                                                                    <span className="text-xs text-green-500">₹</span>{activity.cost || 0}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -233,10 +233,10 @@ const ItineraryView = () => {
                                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 px-1">Logistics & Stats</p>
                                             <div className="space-y-4">
                                                 <div className="p-6 bg-white rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 group/stat hover:-translate-y-1 transition-all">
-                                                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center"><DollarSign size={24}/></div>
+                                                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center"><IndianRupee size={24}/></div>
                                                     <div>
                                                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Est. City Cost</p>
-                                                        <p className="text-2xl font-black text-gray-900">${stop.activities?.reduce((sum, a) => sum + (a.cost || 0), 0) || 0}</p>
+                                                        <p className="text-2xl font-black text-gray-900">₹{stop.activities?.reduce((sum, a) => sum + (a.cost || 0), 0) || 0}</p>
                                                     </div>
                                                 </div>
                                                 <div className="p-6 bg-white rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 group/stat hover:-translate-y-1 transition-all">
@@ -289,7 +289,7 @@ const ItineraryView = () => {
                                 {sIdx + 1}
                             </div>
                             <div className="mb-8">
-                                <h3 className="text-3xl font-black text-gray-900 tracking-tight">{stop.city}</h3>
+                                <h3 className="text-3xl font-black text-gray-900 tracking-tight">{stop.city}{stop.country ? `, ${stop.country}` : ''}</h3>
                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">{new Date(stop.arrivalDate).toLocaleDateString()} - {new Date(stop.departureDate).toLocaleDateString()}</p>
                             </div>
                             <div className="space-y-4">
@@ -310,7 +310,7 @@ const ItineraryView = () => {
                                             <div className="w-px h-8 bg-gray-100"></div>
                                             <div>
                                                 <p className="text-[10px] font-black text-gray-400 uppercase mb-1">Cost</p>
-                                                <p className="text-sm font-black text-indigo-600">${activity.cost || 0}</p>
+                                                <p className="text-sm font-black text-indigo-600">₹{activity.cost || 0}</p>
                                             </div>
                                         </div>
                                     </div>

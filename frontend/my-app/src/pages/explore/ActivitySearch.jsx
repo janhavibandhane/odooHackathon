@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Clock, DollarSign, Filter, Sparkles } from 'lucide-react';
+import { Search, MapPin, Clock, IndianRupee, Filter, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { geminiService } from '../../services/geminiService';
 import { tripService, stopService, activityService } from '../../services/apiService';
 import { toast } from 'react-toastify';
 
 const MOCK_ACTIVITIES = [
-  { id: 1, title: 'Eiffel Tower Summit Tour', city: 'Paris', type: 'Sightseeing', cost: 45, duration: 120, image: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&q=80&w=600' },
-  { id: 2, title: 'Sushi Making Class', city: 'Tokyo', type: 'Food', cost: 80, duration: 180, image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&q=80&w=600' },
-  { id: 3, title: 'Colosseum Underground Tour', city: 'Rome', type: 'History', cost: 60, duration: 150, image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&q=80&w=600' },
-  { id: 4, title: 'Central Park Bike Rental', city: 'New York City', type: 'Active', cost: 15, duration: 240, image: 'https://images.unsplash.com/photo-1517400508447-f8dd518b86db?auto=format&fit=crop&q=80&w=600' },
+  { id: 1, title: 'Taj Mahal Sunrise Tour', city: 'Agra', type: 'History', cost: 1200, duration: 180, image: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&q=80&w=600' },
+  { id: 2, title: 'Old Delhi Food Walk', city: 'New Delhi', type: 'Food', cost: 850, duration: 150, image: 'https://images.unsplash.com/photo-1589301760014-d929f39ce9b1?auto=format&fit=crop&q=80&w=600' },
+  { id: 3, title: 'Amber Fort Heritage Tour', city: 'Jaipur', type: 'History', cost: 900, duration: 240, image: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&q=80&w=600' },
+  { id: 4, title: 'Marine Drive Evening Cycling', city: 'Mumbai', type: 'Active', cost: 500, duration: 120, image: 'https://images.unsplash.com/photo-1566552881560-0be862a7c445?auto=format&fit=crop&q=80&w=600' },
 ];
 
 const CATEGORIES = ['All', 'Sightseeing', 'Food', 'History', 'Active', 'Nature', 'Adventure'];
@@ -204,7 +204,7 @@ const ActivitySearch = () => {
                 
                 <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
                   <div className="flex items-center text-lg font-bold text-gray-900">
-                    <DollarSign className="w-4 h-4 text-gray-500" />{activity.cost}
+                    <IndianRupee className="w-4 h-4 text-gray-500" />{activity.cost}
                   </div>
                   <button 
                     onClick={() => handleOpenAddModal(activity)}

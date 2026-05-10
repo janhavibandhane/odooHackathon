@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { 
-  DollarSign, 
+  IndianRupee, 
   PieChart, 
   TrendingUp, 
   Plus, 
@@ -158,7 +158,7 @@ const Budget = () => {
               <div className="bg-indigo-50 px-6 py-3 rounded-2xl border border-indigo-100">
                 <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">Total Budget</p>
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl font-black text-indigo-900">${currentBudget.totalBudget.toLocaleString()}</span>
+                  <span className="text-2xl font-black text-indigo-900">₹{currentBudget.totalBudget.toLocaleString()}</span>
                   <button onClick={() => document.getElementById('budget_modal').showModal()} className="text-indigo-400 hover:text-indigo-600">
                     <TrendingUp size={18} />
                   </button>
@@ -169,7 +169,7 @@ const Budget = () => {
                   {remainingBudget < 0 ? 'Over Budget' : 'Remaining'}
                 </p>
                 <span className={`text-2xl font-black ${remainingBudget < 0 ? 'text-red-900' : 'text-green-900'}`}>
-                  ${Math.abs(remainingBudget).toLocaleString()}
+                  ₹{Math.abs(remainingBudget).toLocaleString()}
                 </span>
               </div>
             </div>
@@ -213,7 +213,7 @@ const Budget = () => {
                     <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Calendar size={20}/></div>
                     <div>
                       <p className="text-xs text-gray-500 font-bold uppercase">Daily Average</p>
-                      <p className="text-xl font-black text-gray-900">${avgCostPerDay.toFixed(2)}</p>
+                      <p className="text-xl font-black text-gray-900">₹{avgCostPerDay.toFixed(2)}</p>
                     </div>
                   </div>
                   {isOverDailyBudget && (
@@ -227,7 +227,7 @@ const Budget = () => {
                   <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Wallet size={20}/></div>
                   <div>
                     <p className="text-xs text-gray-500 font-bold uppercase">Daily Target</p>
-                    <p className="text-xl font-black text-gray-900">${dailyBudget.toFixed(2)}</p>
+                    <p className="text-xl font-black text-gray-900">₹{dailyBudget.toFixed(2)}</p>
                   </div>
                 </div>
 
@@ -238,7 +238,7 @@ const Budget = () => {
                        <div key={cat}>
                          <div className="flex justify-between text-sm mb-1.5">
                            <span className="font-semibold text-gray-700">{cat}</span>
-                           <span className="font-black text-gray-900">${categoryTotals[cat].toLocaleString()}</span>
+                           <span className="font-black text-gray-900">₹{categoryTotals[cat].toLocaleString()}</span>
                          </div>
                          <div className="w-full bg-gray-50 rounded-full h-1.5">
                            <div 
@@ -269,7 +269,7 @@ const Budget = () => {
                 />
                 <div className="grid grid-cols-2 gap-3">
                   <div className="relative">
-                    <span className="absolute left-3 top-3.5 text-white/40 text-sm">$</span>
+                    <span className="absolute left-3 top-3.5 text-white/40 text-sm">₹</span>
                     <input
                       type="number"
                       required
@@ -314,7 +314,7 @@ const Budget = () => {
               {currentBudget.expenses.length === 0 ? (
                 <div className="p-16 text-center">
                   <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <DollarSign className="text-gray-300" size={40} />
+                    <IndianRupee className="text-gray-300" size={40} />
                   </div>
                   <h4 className="text-gray-900 font-bold">No expenses yet</h4>
                   <p className="text-gray-400 text-sm">Start logging your costs to see the breakdown.</p>
@@ -348,7 +348,7 @@ const Budget = () => {
                               {new Date(expense.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </td>
                             <td className="py-4 px-6 text-right">
-                              <span className="font-black text-gray-900">${expense.amount.toLocaleString()}</span>
+                              <span className="font-black text-gray-900">₹{expense.amount.toLocaleString()}</span>
                             </td>
                             <td className="py-4 px-6 text-right">
                               <button 
@@ -376,7 +376,7 @@ const Budget = () => {
           <h3 className="font-black text-2xl mb-6 text-gray-900">Set Trip Budget</h3>
           <form onSubmit={handleUpdateTotal}>
             <div className="relative mb-6">
-              <span className="absolute left-4 top-4 text-gray-400 font-bold text-xl">$</span>
+              <span className="absolute left-4 top-4 text-gray-400 font-bold text-xl">₹</span>
               <input
                 type="number"
                 min="0"
