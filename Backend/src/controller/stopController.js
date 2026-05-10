@@ -87,3 +87,34 @@ export const deleteStop = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Update a stop
+// @route   PUT /api/trips/:tripId/stops/:id
+// @access  Private
+export const updateStop = async (req, res, next) => {
+  try {
+    const stop = await Stop.findById(req.params.id);
+
+    if (!stop) {
+      res.status(404);
+      throw new Error('Stop not found');
+    }
+
+    // Verify trip ownership
+    const trip = await Trip.findById(stop.tripId);
+    if (trip.userId.toString() !== req.user._id.toString()) {
+      res.status(401);
+      throw new Error('Not authorized');
+    }
+
+    const updatedStop = await Stop.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    res.json(updatedStop);
+  } catch (error) {
+    next(error);
+  }
+};

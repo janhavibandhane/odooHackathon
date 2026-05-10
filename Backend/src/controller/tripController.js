@@ -110,6 +110,30 @@ export const updateTrip = async (req, res, next) => {
   }
 };
 
+// @desc    Delete Trip
+// @route   DELETE /api/trips/:id
+// @access  Private
+export const deleteTrip = async (req, res, next) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+
+    if (!trip) {
+      res.status(404);
+      throw new Error('Trip not found');
+    }
+
+    if (trip.userId.toString() !== req.user._id.toString()) {
+      res.status(401);
+      throw new Error('Not authorized to delete this trip');
+    }
+
+    await trip.deleteOne();
+    res.json({ message: 'Trip removed' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Update Trip Budget
 // @route   PUT /api/trips/:id/budget
 // @access  Private

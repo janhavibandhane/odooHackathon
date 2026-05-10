@@ -5,6 +5,7 @@ import {
   getTripById, 
   getPublicTrip,
   updateTrip, 
+  deleteTrip,
   updateTripBudget, 
   updateTripPackingList, 
   updateTripNotes 
@@ -23,7 +24,8 @@ router.route('/public/:id')
 
 router.route('/:id')
   .get(protect, getTripById)
-  .put(protect, updateTrip);
+  .put(protect, updateTrip)
+  .delete(protect, deleteTrip);
 
 router.route('/:id/budget')
   .put(protect, updateTripBudget);

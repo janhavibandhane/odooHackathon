@@ -124,3 +124,64 @@ export const updateUserProfile = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Forgot password - Send reset token
+// @route   POST /api/auth/forgot-password
+// @access  Public
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    // Generate random token
+    const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
+    // Set token and expiry on user
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // In a real app, send an email here. For now, just return the token.
+    res.json({ 
+      message: 'Password reset link generated',
+      resetToken: resetToken // Returning it directly for hackathon testing
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Reset password
+// @route   POST /api/auth/reset-password/:token
+// @access  Public
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      res.status(400);
+      throw new Error('Invalid or expired reset token');
+    }
+
+    // Set new password
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json({ message: 'Password reset successful' });
+  } catch (error) {
+    next(error);
+  }
+};

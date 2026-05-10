@@ -1,6 +1,7 @@
 // src/components/Navbar.jsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 function Navbar({ sidebarId = "my-drawer-4" }) {
   const { user, logout } = useAuth();
@@ -104,33 +105,7 @@ function Navbar({ sidebarId = "my-drawer-4" }) {
           
           {/* Right Actions */}
           <div className="flex-none flex items-center gap-2 md:gap-3">
-            {/* Quick Actions Dropdown */}
-            <div className="dropdown dropdown-end">
-              <div tabIndex={0} className="btn-navbar-icon group">
-                <svg className="size-5 transition-transform group-hover:scale-110 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                <span className="hidden sm:inline text-sm font-medium">Create</span>
-              </div>
-              <ul className="mt-3 p-2 shadow-xl menu dropdown-content bg-white rounded-2xl w-80 border border-gray-100">
-                <li className="menu-title text-gray-400 px-3 pt-2 pb-1 text-xs font-bold tracking-wider">
-                  <span>QUICK CREATE</span>
-                </li>
-                {quickActions.map((action, idx) => (
-                  <li key={idx}>
-                    <a className="group rounded-xl transition-all duration-200 hover:bg-gray-50">
-                      <div className={`w-9 h-9 bg-${action.color}-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                        <svg className={`size-5 text-${action.color}-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={action.icon} />
-                        </svg>
-                      </div>
-                      <span className="text-gray-700 font-medium">{action.name}</span>
-                      <span className="text-xs text-gray-400 font-mono ml-auto">{action.shortcut}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            
             
             {/* Search Button - Mobile */}
             <button 
@@ -142,54 +117,7 @@ function Navbar({ sidebarId = "my-drawer-4" }) {
               </svg>
             </button>
             
-            {/* Notifications */}
-            <div className="dropdown dropdown-end">
-              <div tabIndex={0} className="btn-navbar-icon relative group">
-                <div className="indicator">
-                  <svg className="size-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                  </svg>
-                  {notifications > 0 && (
-                    <span className="badge-notification animate-pulse">{notifications}</span>
-                  )}
-                </div>
-              </div>
-              <ul tabIndex={0} className="mt-3 p-2 shadow-xl menu dropdown-content bg-white rounded-2xl w-96 border border-gray-100">
-                <li className="menu-title text-gray-400 flex justify-between items-center px-3 pt-2 pb-1">
-                  <span className="text-xs font-bold tracking-wider">NOTIFICATIONS</span>
-                  <button className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">Mark all read</button>
-                </li>
-                <li>
-                  <a className="notification-item group">
-                    <div className="w-11 h-11 bg-indigo-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <svg className="size-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">Task completed</div>
-                      <div className="text-xs text-gray-500 mt-0.5">"Update documentation" was marked as done</div>
-                      <div className="text-xs text-gray-400 mt-1">2 minutes ago</div>
-                    </div>
-                  </a>
-                </li>
-                <li>
-                  <a className="notification-item group">
-                    <div className="w-11 h-11 bg-purple-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <svg className="size-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">New team member</div>
-                      <div className="text-xs text-gray-500 mt-0.5">Sarah joined the workspace</div>
-                      <div className="text-xs text-gray-400 mt-1">1 hour ago</div>
-                    </div>
-                  </a>
-                </li>
-              </ul>
-            </div>
-            
+           
             {/* Profile Dropdown */}
             <div className="dropdown dropdown-end">
               <div tabIndex={0} className="btn-profile group">
@@ -214,14 +142,14 @@ function Navbar({ sidebarId = "my-drawer-4" }) {
                 <li className="menu-title text-gray-400 px-3 pt-2 pb-1">
                   <span className="text-xs font-bold tracking-wider">ACCOUNT</span>
                 </li>
-                <li><a className="profile-menu-item">
+                <li><Link to="/profile"  className="profile-menu-item">
                   <div className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-indigo-50 transition-colors">
                     <svg className="size-5 text-gray-600 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
                   <span className="font-medium">My Profile</span>
-                </a></li>
+                </Link></li>
                 <li><a className="profile-menu-item">
                   <div className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-indigo-50 transition-colors">
                     <svg className="size-5 text-gray-600 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

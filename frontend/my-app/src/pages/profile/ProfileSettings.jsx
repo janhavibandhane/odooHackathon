@@ -5,7 +5,7 @@ import { User, Mail, Image as ImageIcon, Shield, Save } from 'lucide-react';
 import { authService } from '../../services/apiService';
 
 const ProfileSettings = () => {
-  const { user, login } = useAuth(); // We might use login to update the user context
+  const { user, updateUser } = useAuth();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -48,9 +48,8 @@ const ProfileSettings = () => {
       });
 
       
-      // Update local storage and context
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      login(updatedUser); // This updates the auth context
+      // Update context and local storage via updateUser
+      updateUser(updatedUser);
 
       toast.success('Profile updated successfully');
       setFormData({ ...formData, password: '', confirmPassword: '' }); // clear passwords

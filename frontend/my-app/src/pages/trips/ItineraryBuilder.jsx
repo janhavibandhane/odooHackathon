@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
-import { Plus, MapPin, Calendar, Trash2, ArrowRight } from 'lucide-react';
+import { Plus, MapPin, Calendar, Trash2, ArrowRight, ChevronUp, ChevronDown } from 'lucide-react';
 
 import { tripService, stopService, activityService } from '../../services/apiService';
 
@@ -92,6 +92,35 @@ const ItineraryBuilder = () => {
     }
   };
 
+  const handleMoveStop = async (index, direction) => {
+    if (
+      (direction === -1 && index === 0) || 
+      (direction === 1 && index === stops.length - 1)
+    ) return;
+
+    const newStops = [...stops];
+    const targetIndex = index + direction;
+    
+    // Swap order values
+    const tempOrder = newStops[index].order;
+    newStops[index].order = newStops[targetIndex].order;
+    newStops[targetIndex].order = tempOrder;
+
+    // Swap positions in array
+    const temp = newStops[index];
+    newStops[index] = newStops[targetIndex];
+    newStops[targetIndex] = temp;
+
+    setStops(newStops);
+
+    try {
+      await stopService.updateStop(id, newStops[index]._id, { order: newStops[index].order });
+      await stopService.updateStop(id, newStops[targetIndex]._id, { order: newStops[targetIndex].order });
+    } catch (error) {
+      toast.error('Failed to save new order');
+    }
+  };
+
   const handleAddActivity = async (e) => {
     e.preventDefault();
     try {
@@ -174,7 +203,23 @@ const ItineraryBuilder = () => {
               {stops.map((stop, index) => (
                 <li key={stop._id} className={`step ${activeStopId === stop._id ? 'step-primary' : 'step-neutral'} cursor-pointer w-full text-left`} onClick={() => setActiveStopId(stop._id)}>
                   <div className={`p-3 rounded-xl w-full flex justify-between items-center transition-colors ${activeStopId === stop._id ? 'bg-indigo-50 border border-indigo-100' : 'hover:bg-gray-50'}`}>
-                    <div>
+                    <div className="flex flex-col gap-1 mr-2">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleMoveStop(index, -1); }} 
+                        disabled={index === 0}
+                        className="text-gray-400 hover:text-indigo-600 disabled:opacity-30"
+                      >
+                        <ChevronUp size={16} />
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleMoveStop(index, 1); }} 
+                        disabled={index === stops.length - 1}
+                        className="text-gray-400 hover:text-indigo-600 disabled:opacity-30"
+                      >
+                        <ChevronDown size={16} />
+                      </button>
+                    </div>
+                    <div className="flex-1">
                       <h3 className="font-bold text-gray-900">{stop.city}, {stop.country}</h3>
                       <p className="text-xs text-gray-500">{new Date(stop.arrivalDate).toLocaleDateString()} - {new Date(stop.departureDate).toLocaleDateString()}</p>
                     </div>

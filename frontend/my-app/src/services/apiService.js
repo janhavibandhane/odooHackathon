@@ -21,6 +21,10 @@ export const tripService = {
     const { data } = await api.put(`/trips/${id}`, tripData);
     return data;
   },
+  deleteTrip: async (id) => {
+    const { data } = await api.delete(`/trips/${id}`);
+    return data;
+  },
   updateBudget: async (id, budgetData) => {
     const { data } = await api.put(`/trips/${id}/budget`, budgetData);
     return data;
@@ -76,6 +80,14 @@ export const activityService = {
 export const authService = {
   updateProfile: async (profileData) => {
     const { data } = await api.put('/auth/profile', profileData);
+    return data;
+  },
+  forgotPassword: async (email) => {
+    const { data } = await api.post('/auth/forgot-password', { email });
+    return data;
+  },
+  resetPassword: async (token, password) => {
+    const { data } = await api.post(`/auth/reset-password/${token}`, { password });
     return data;
   },
 };

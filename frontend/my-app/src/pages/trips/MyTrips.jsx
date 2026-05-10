@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
-import { Calendar, MapPin, ArrowRight } from 'lucide-react';
+import { Calendar, MapPin, ArrowRight, Trash2 } from 'lucide-react';
 
 import { tripService } from '../../services/apiService';
 
@@ -93,12 +93,32 @@ const MyTrips = () => {
                   >
                     Edit Itinerary
                   </button>
-                  <button
-                    onClick={() => navigate(`/trips/${trip._id}/view`)}
-                    className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-indigo-600 group-hover:translate-x-1 transition-transform"
-                  >
-                    View <ArrowRight className="ml-1 h-4 w-4" />
-                  </button>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (window.confirm('Are you sure you want to delete this trip?')) {
+                          try {
+                            await tripService.deleteTrip(trip._id);
+                            setTrips(trips.filter(t => t._id !== trip._id));
+                            toast.success('Trip deleted successfully');
+                          } catch (error) {
+                            toast.error('Failed to delete trip');
+                          }
+                        }
+                      }}
+                      className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                      title="Delete trip"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => navigate(`/trips/${trip._id}/view`)}
+                      className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-indigo-600 group-hover:translate-x-1 transition-transform"
+                    >
+                      View <ArrowRight className="ml-1 h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
