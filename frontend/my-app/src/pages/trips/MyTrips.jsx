@@ -4,6 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { Calendar, MapPin, ArrowRight } from 'lucide-react';
 
+import { tripService } from '../../services/apiService';
+
 const MyTrips = () => {
   const [trips, setTrips] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -13,18 +15,10 @@ const MyTrips = () => {
   useEffect(() => {
     const fetchTrips = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/trips', {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
-        
-        if (!response.ok) throw new Error('Failed to fetch trips');
-        
-        const data = await response.json();
+        const data = await tripService.getMyTrips();
         setTrips(data);
       } catch (error) {
-        toast.error(error.message);
+        toast.error(error.message || 'Failed to fetch trips');
       } finally {
         setIsLoading(false);
       }

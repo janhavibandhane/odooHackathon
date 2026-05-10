@@ -4,6 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { MapPin, Calendar, Clock, DollarSign, Share2, Printer, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-toastify';
 
+import { tripService, stopService, activityService } from '../../services/apiService';
+import TripTabs from '../../components/trips/TripTabs';
+
 const ItineraryView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -17,30 +20,24 @@ const ItineraryView = () => {
   useEffect(() => {
     const fetchFullTrip = async () => {
       try {
-        const tripRes = await fetch(`http://localhost:3001/api/trips/${id}`, {
-          headers: { Authorization: `Bearer ${user.token}` }
-        });
-        if (!tripRes.ok) throw new Error('Trip not found');
-        const tripData = await tripRes.json();
+        const tripData = await tripService.getTripById(id);
         setTrip(tripData);
 
-        const stopsRes = await fetch(`http://localhost:3001/api/trips/${id}/stops`, {
-          headers: { Authorization: `Bearer ${user.token}` }
-        });
-        if (stopsRes.ok) {
-          const stopsData = await stopsRes.json();
+        try {
+          const stopsData = await stopService.getStopsForTrip(id);
           setStops(stopsData);
           
           const activitiesMap = {};
           for (const stop of stopsData) {
-            const actRes = await fetch(`http://localhost:3001/api/stops/${stop._id}/activities`, {
-              headers: { Authorization: `Bearer ${user.token}` }
-            });
-            if (actRes.ok) {
-              activitiesMap[stop._id] = await actRes.json();
+            try {
+              activitiesMap[stop._id] = await activityService.getActivitiesForStop(stop._id);
+            } catch (err) {
+              console.error(`Failed to load activities for stop ${stop._id}`);
             }
           }
           setActivities(activitiesMap);
+        } catch (err) {
+          console.error("Failed to load stops or activities", err);
         }
       } catch (error) {
         toast.error('Failed to load itinerary details.');
@@ -51,15 +48,17 @@ const ItineraryView = () => {
     };
 
     fetchFullTrip();
-  }, [id, user.token, navigate]);
+  }, [id, navigate]);
 
   if (isLoading) return <div className="flex justify-center p-12"><span className="loading loading-spinner text-indigo-600"></span></div>;
   if (!trip) return <div>Trip not found</div>;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      
-      {/* Action Bar */}
+    <div className="bg-gray-50 min-h-screen">
+      <TripTabs />
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        
+        {/* Action Bar */}
       <div className="flex justify-between items-center mb-6">
         <button onClick={() => navigate(`/trips/${id}/builder`)} className="btn btn-ghost btn-sm text-gray-500">
           <ArrowLeft size={16} /> Back to Editor
@@ -167,7 +166,7 @@ const ItineraryView = () => {
           </div>
         ))}
       </div>
-
+    </div>
     </div>
   );
 };

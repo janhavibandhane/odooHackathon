@@ -4,6 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { BookOpen, Plus, Trash2, ArrowLeft, Clock } from 'lucide-react';
 
+import { tripService } from '../../services/apiService';
+import TripTabs from '../../components/trips/TripTabs';
+
 const Journal = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -21,14 +24,10 @@ const Journal = () => {
 
   const fetchTrip = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/trips/${id}`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      if (!response.ok) throw new Error('Failed to fetch trip data');
-      const data = await response.json();
+      const data = await tripService.getTripById(id);
       setTrip(data);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to fetch trip data');
     } finally {
       setIsLoading(false);
     }
@@ -36,20 +35,11 @@ const Journal = () => {
 
   const saveNotes = async (newNotes) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/trips/${id}/notes`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`
-        },
-        body: JSON.stringify({ notes: newNotes })
-      });
-      if (!response.ok) throw new Error('Failed to save notes');
-      const data = await response.json();
+      const data = await tripService.updateNotes(id, { notes: newNotes });
       setTrip(data);
       toast.success('Note saved successfully');
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to save notes');
     }
   };
 
@@ -86,9 +76,11 @@ const Journal = () => {
   const notes = trip.notes || [];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center">
+    <div className="bg-gray-50 min-h-screen">
+      <TripTabs />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
           <button onClick={() => navigate(`/trips/${id}/view`)} className="mr-4 text-gray-500 hover:text-gray-900 transition-colors">
             <ArrowLeft className="w-6 h-6" />
           </button>
@@ -193,6 +185,7 @@ const Journal = () => {
           })}
         </div>
       )}
+    </div>
     </div>
   );
 };

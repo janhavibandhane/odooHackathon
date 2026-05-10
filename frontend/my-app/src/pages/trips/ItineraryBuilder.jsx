@@ -4,6 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { Plus, MapPin, Calendar, Trash2, ArrowRight } from 'lucide-react';
 
+import { tripService, stopService, activityService } from '../../services/apiService';
+
 const ItineraryBuilder = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -30,35 +32,29 @@ const ItineraryBuilder = () => {
     setIsLoading(true);
     try {
       // Fetch trip details
-      const tripRes = await fetch(`http://localhost:3001/api/trips/${id}`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      if (!tripRes.ok) throw new Error('Trip not found');
-      const tripData = await tripRes.json();
+      const tripData = await tripService.getTripById(id);
       setTrip(tripData);
 
       // Fetch stops
-      const stopsRes = await fetch(`http://localhost:3001/api/trips/${id}/stops`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      if (stopsRes.ok) {
-        const stopsData = await stopsRes.json();
+      try {
+        const stopsData = await stopService.getStopsForTrip(id);
         setStops(stopsData);
         
         // Fetch activities for each stop
         const activitiesMap = {};
         for (const stop of stopsData) {
-          const actRes = await fetch(`http://localhost:3001/api/stops/${stop._id}/activities`, {
-            headers: { Authorization: `Bearer ${user.token}` }
-          });
-          if (actRes.ok) {
-            activitiesMap[stop._id] = await actRes.json();
+          try {
+            activitiesMap[stop._id] = await activityService.getActivitiesForStop(stop._id);
+          } catch (err) {
+            console.error(`Failed to load activities for stop ${stop._id}`);
           }
         }
         setActivities(activitiesMap);
+      } catch (err) {
+        console.error("Failed to load stops or activities", err);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to fetch trip data');
       navigate('/trips');
     } finally {
       setIsLoading(false);
@@ -68,25 +64,15 @@ const ItineraryBuilder = () => {
   const handleAddStop = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:3001/api/trips/${id}/stops`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`
-        },
-        body: JSON.stringify({ ...newStop, order: stops.length })
-      });
+      const addedStop = await stopService.createStop(id, { ...newStop, order: stops.length });
       
-      if (!res.ok) throw new Error('Failed to add stop');
-      
-      const addedStop = await res.json();
       setStops([...stops, addedStop]);
       setActivities({ ...activities, [addedStop._id]: [] });
       setShowStopForm(false);
       setNewStop({ city: '', country: '', arrivalDate: '', departureDate: '' });
       toast.success('Stop added!');
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to add stop');
     }
   };
 
@@ -94,12 +80,7 @@ const ItineraryBuilder = () => {
     if (!window.confirm('Are you sure you want to delete this stop and all its activities?')) return;
     
     try {
-      const res = await fetch(`http://localhost:3001/api/trips/${id}/stops/${stopId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      
-      if (!res.ok) throw new Error('Failed to delete stop');
+      await stopService.deleteStop(id, stopId);
       
       setStops(stops.filter(s => s._id !== stopId));
       const newActivities = { ...activities };
@@ -107,25 +88,15 @@ const ItineraryBuilder = () => {
       setActivities(newActivities);
       toast.success('Stop deleted');
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to delete stop');
     }
   };
 
   const handleAddActivity = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:3001/api/stops/${activeStopId}/activities`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`
-        },
-        body: JSON.stringify(newActivity)
-      });
+      const addedActivity = await activityService.createActivity(activeStopId, newActivity);
       
-      if (!res.ok) throw new Error('Failed to add activity');
-      
-      const addedActivity = await res.json();
       setActivities({
         ...activities,
         [activeStopId]: [...(activities[activeStopId] || []), addedActivity]
@@ -134,18 +105,13 @@ const ItineraryBuilder = () => {
       setNewActivity({ title: '', type: 'General', cost: 0, duration: 60, description: '' });
       toast.success('Activity added!');
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to add activity');
     }
   };
 
   const handleDeleteActivity = async (activityId, stopId) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/activities/${activityId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      
-      if (!res.ok) throw new Error('Failed to delete activity');
+      await activityService.deleteActivity(activityId);
       
       setActivities({
         ...activities,
@@ -153,7 +119,7 @@ const ItineraryBuilder = () => {
       });
       toast.success('Activity deleted');
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to delete activity');
     }
   };
 

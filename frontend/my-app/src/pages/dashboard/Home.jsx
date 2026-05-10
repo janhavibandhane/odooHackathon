@@ -1,569 +1,205 @@
-import { useState, useEffect } from 'react';
-import {
-  Users,
-  Activity,
-  ArrowUpRight,
-  ArrowDownRight,
-  User,
-  Download,
-  RefreshCw,
-  MoreVertical,
-  Bell,
-  Search,
-  Sparkles,
-  Award,
-  Target,
-  Zap,
-  Shield,
-  Crown,
-  Star,
-  BarChart3,
-  Wallet,
-  Globe,
-  Clock,
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { 
+  Map, 
+  Calendar, 
+  Plus, 
+  Compass, 
+  Heart, 
+  Clock, 
+  MapPin, 
+  ArrowRight
 } from 'lucide-react';
-
-import api from '../../api/axios';
+import { tripService } from '../../services/apiService';
 import { toast } from 'react-toastify';
 
-// Animated Background
-const AnimatedBackground = () => (
-  <div className="fixed inset-0 -z-10 overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900" />
-
-    <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob" />
-    <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000" />
-    <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000" />
-    <div className="absolute bottom-0 right-20 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-6000" />
-  </div>
-);
-
-// Counter
-const AnimatedCounter = ({ value, duration = 2000 }) => {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    let start = 0;
-
-    const increment = value / (duration / 16);
-
-    const timer = setInterval(() => {
-      start += increment;
-
-      if (start >= value) {
-        setCount(value);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(start));
-      }
-    }, 16);
-
-    return () => clearInterval(timer);
-  }, [value, duration]);
-
-  return <span>{Number(count).toLocaleString()}</span>;
-};
-
-// Stat Card
-const StatCard = ({
-  title,
-  value,
-  icon: Icon,
-  trend,
-  isPositive,
-  subtitle,
-  color,
-}) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  const gradients = {
-    blue: 'from-blue-500 to-cyan-500',
-    purple: 'from-purple-500 to-pink-500',
-    orange: 'from-orange-500 to-red-500',
-    green: 'from-green-500 to-emerald-500',
-  };
-
-  return (
-    <div
-      className="relative group cursor-pointer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div
-        className={`absolute -inset-0.5 rounded-2xl blur opacity-30 bg-gradient-to-r ${gradients[color]} ${
-          isHovered ? 'scale-105 opacity-100' : ''
-        } transition duration-300`}
-      />
-
-      <div className="relative glass-card p-6 rounded-2xl backdrop-blur-xl bg-white/90 dark:bg-gray-800/90 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
-        <div className="flex items-center justify-between mb-4">
-          <div
-            className={`relative w-14 h-14 rounded-2xl bg-gradient-to-br ${gradients[color]} flex items-center justify-center text-white shadow-lg`}
-          >
-            <Icon className="w-7 h-7" />
-          </div>
-
-          <div
-            className={`flex items-center gap-1 text-sm font-semibold px-3 py-1.5 rounded-full ${
-              isPositive
-                ? 'bg-green-500/20 text-green-600'
-                : 'bg-red-500/20 text-red-600'
-            }`}
-          >
-            {isPositive ? (
-              <ArrowUpRight className="w-4 h-4" />
-            ) : (
-              <ArrowDownRight className="w-4 h-4" />
-            )}
-
-            {trend}%
-          </div>
-        </div>
-
-        <div>
-          <h3 className="text-base-content/60 text-sm font-medium mb-1">
-            {title}
-          </h3>
-
-          <p className="text-4xl font-bold">
-            {title === 'Total Revenue' ? '$' : ''}
-            <AnimatedCounter value={value} />
-          </p>
-
-          {subtitle && (
-            <p className="text-xs text-base-content/40 mt-2 flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              {subtitle}
-            </p>
-          )}
-        </div>
-
-        <div
-          className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r ${
-            gradients[color]
-          } rounded-b-2xl transition-all duration-300 ${
-            isHovered ? 'w-full' : 'w-0'
-          }`}
-        />
-      </div>
-    </div>
-  );
-};
-
-// Revenue Chart
-const RevenueChart = ({
-  data,
-  selectedPeriod,
-  setSelectedPeriod,
-}) => {
-  const [activePoint, setActivePoint] = useState(null);
-
-  const maxValue = Math.max(...data);
-
-  return (
-    <div className="relative">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h3 className="text-2xl font-bold flex items-center gap-2">
-            <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full" />
-            Revenue Analytics
-          </h3>
-
-          <p className="text-base-content/50 text-sm mt-1">
-            Track your revenue performance
-          </p>
-        </div>
-
-        <div className="flex gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-xl">
-          {['weekly', 'monthly', 'yearly'].map((period) => (
-            <button
-              key={period}
-              onClick={() => setSelectedPeriod(period)}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
-                selectedPeriod === period
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
-                  : 'hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              {period}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="relative h-80">
-        <svg viewBox="0 0 800 300" className="w-full h-full">
-          <polyline
-            points={data
-              .map(
-                (value, index) =>
-                  `${(index / (data.length - 1)) * 800},${
-                    300 - (value / maxValue) * 250
-                  }`
-              )
-              .join(' ')}
-            fill="none"
-            stroke="#8b5cf6"
-            strokeWidth="4"
-          />
-
-          {data.map((value, index) => (
-            <circle
-              key={index}
-              cx={(index / (data.length - 1)) * 800}
-              cy={300 - (value / maxValue) * 250}
-              r="6"
-              fill="#8b5cf6"
-              onMouseEnter={() => setActivePoint(index)}
-              onMouseLeave={() => setActivePoint(null)}
-            />
-          ))}
-        </svg>
-      </div>
-    </div>
-  );
-};
-
-// Activity Feed
-const ActivityFeed = ({ activities }) => {
-  const icons = [User, Award, Target, Zap, Shield, Crown, Star];
-
-  return (
-    <div className="space-y-3">
-      {activities?.map((activity, index) => {
-        const IconComponent = icons[index % icons.length];
-
-        return (
-          <div
-            key={activity.id}
-            className="group relative overflow-hidden rounded-xl p-4 hover:bg-white/50 dark:hover:bg-gray-700/50 transition-all duration-300"
-          >
-            <div className="flex items-center gap-4 relative">
-              <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg">
-                <IconComponent className="w-5 h-5" />
-              </div>
-
-              <div className="flex-1">
-                <p className="font-semibold text-base-content">
-                  {activity.message}
-                </p>
-
-                <div className="flex items-center gap-2 mt-1">
-                  <Clock className="w-3 h-3 text-base-content/40" />
-
-                  <span className="text-xs text-base-content/40">
-                    {activity.time}
-                  </span>
-                </div>
-              </div>
-
-              <MoreVertical className="w-4 h-4 text-base-content/40" />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+const RECOMMENDED_CITIES = [
+  { name: 'Kyoto', country: 'Japan', image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&q=80&w=600' },
+  { name: 'Rome', country: 'Italy', image: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&q=80&w=600' },
+  { name: 'Cape Town', country: 'South Africa', image: 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?auto=format&fit=crop&q=80&w=600' }
+];
 
 const Home = () => {
-  const [statsData, setStatsData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] =
-    useState('weekly');
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [upcomingTrips, setUpcomingTrips] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [refreshing, setRefreshing] = useState(false);
-
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const revenueData = {
-    weekly: [18500, 19200, 18800, 21500, 23800, 25600, 28900],
-    monthly: [45800, 52300, 58900, 65700, 71200, 78900, 84500],
-    yearly: [
-      425000,
-      487000,
-      568000,
-      678000,
-      789000,
-      890000,
-      1020000,
-    ],
-  };
+  // Redirect admin to Admin Dashboard
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
 
   useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const trips = await tripService.getMyTrips();
+        // Sort by start date, only future trips, take top 3
+        const sorted = trips
+          .filter(t => new Date(t.startDate) >= new Date())
+          .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+          .slice(0, 3);
+        setUpcomingTrips(sorted);
+      } catch (error) {
+        toast.error('Failed to load trips');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchDashboardData();
   }, []);
 
-  const fetchDashboardData = async () => {
-    try {
-      const { data } = await api.get('/dashboard/stats');
-      setStatsData(data);
-    } catch (error) {
-      console.error(error);
-      toast.error('Failed to load dashboard data');
-    } finally {
-      setLoading(false);
-    }
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-
-    await fetchDashboardData();
-
-    setTimeout(() => setRefreshing(false), 1000);
-
-    toast.success('Dashboard refreshed!');
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <AnimatedBackground />
-
-        <div className="relative">
-          <div className="w-20 h-20 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
-
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Zap className="w-8 h-8 text-purple-500 animate-pulse" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const statsList = [
-    {
-      title: 'Total Revenue',
-      value: statsData?.revenue?.value || 125890,
-      icon: Wallet,
-      trend: 23.5,
-      isPositive: true,
-      subtitle: 'vs. last month',
-      color: 'blue',
-    },
-
-    {
-      title: 'Active Users',
-      value: statsData?.users?.value || 2847,
-      icon: Users,
-      trend: 18.2,
-      isPositive: true,
-      subtitle: 'new users this week',
-      color: 'purple',
-    },
-
-    {
-      title: 'Active Sessions',
-      value: statsData?.sessions?.value || 1542,
-      icon: Activity,
-      trend: 12.8,
-      isPositive: true,
-      subtitle: 'current active',
-      color: 'orange',
-    },
-
-    {
-      title: 'Conversion Rate',
-      value: 24.8,
-      icon: Target,
-      trend: 5.3,
-      isPositive: true,
-      subtitle: 'vs. last week',
-      color: 'green',
-    },
-  ];
 
   return (
-    <div className="relative min-h-screen">
-      <AnimatedBackground />
-
-      <div className="relative z-10 p-6 lg:p-8 space-y-8">
-        {/* Banner */}
-
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 p-8 text-white shadow-2xl">
-          <div className="relative flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-            <div>
-              <h1 className="text-3xl lg:text-4xl font-bold mb-2">
-                Welcome back, Admin!
-              </h1>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-
-                <input
-                  type="text"
-                  placeholder="Search dashboard..."
-                  value={searchTerm}
-                  onChange={(e) =>
-                    setSearchTerm(e.target.value)
-                  }
-                  className="pl-9 pr-4 py-2 rounded-xl bg-white/20 border border-white/30 focus:outline-none text-white placeholder-white/60"
-                />
-              </div>
-
-              <button className="relative p-2 rounded-xl bg-white/20 hover:bg-white/30">
-                <Bell className="w-5 h-5" />
-              </button>
-
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="p-2 rounded-xl bg-white/20 hover:bg-white/30"
-              >
-                <RefreshCw
-                  className={`w-5 h-5 ${
-                    refreshing ? 'animate-spin' : ''
-                  }`}
-                />
-              </button>
-
-              <button className="bg-white text-purple-600 px-5 py-2 rounded-xl font-semibold shadow-lg flex items-center gap-2">
-                <Download className="w-4 h-4" />
-                Download Report
-              </button>
-            </div>
-          </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Welcome Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-8 sm:p-10 shadow-xl text-white">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">
+            Welcome back, {user?.name || 'Traveler'}! ✈️
+          </h1>
+          <p className="text-indigo-100 text-lg max-w-2xl">
+            Where to next? The world is yours to explore. Plan your dream trip or discover new destinations.
+          </p>
         </div>
+        <button 
+          onClick={() => navigate('/trips/create')}
+          className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-indigo-700 bg-white hover:bg-indigo-50 shadow-sm transition-colors whitespace-nowrap"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Plan New Trip
+        </button>
+      </div>
 
-        {/* Stats */}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statsList.map((stat, i) => (
-            <StatCard key={i} {...stat} />
-          ))}
-        </div>
-
-        {/* Charts */}
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="glass-card p-6 rounded-2xl bg-white/90 shadow-xl">
-            <RevenueChart
-              data={revenueData[selectedPeriod]}
-              selectedPeriod={selectedPeriod}
-              setSelectedPeriod={setSelectedPeriod}
-            />
-          </div>
-
-          <div className="glass-card p-6 rounded-2xl bg-white/90 shadow-xl">
-            <h3 className="text-2xl font-bold mb-6">
-              Performance Metrics
-            </h3>
-
-            <div className="space-y-6">
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span>User Growth</span>
-                  <span className="font-bold text-purple-600">
-                    +245 this week
-                  </span>
-                </div>
-
-                <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
-                    style={{ width: '68%' }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Activity */}
-
-        <div className="glass-card p-6 rounded-2xl bg-white/90 shadow-xl">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column - Upcoming Trips */}
+        <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold">
-              Live Activity Feed
-            </h3>
-
-            <button className="text-sm text-purple-600 font-semibold">
-              View All →
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+              <Calendar className="w-6 h-6 mr-2 text-indigo-600" /> 
+              Upcoming Trips
+            </h2>
+            <button 
+              onClick={() => navigate('/trips')}
+              className="text-indigo-600 font-medium hover:text-indigo-800 flex items-center text-sm"
+            >
+              View all <ArrowRight className="w-4 h-4 ml-1" />
             </button>
           </div>
 
-          <ActivityFeed
-            activities={
-              statsData?.recentActivity || [
-                {
-                  id: 1,
-                  message: 'New user registered',
-                  time: '2 minutes ago',
-                },
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2].map(i => (
+                <div key={i} className="skeleton h-32 w-full rounded-2xl"></div>
+              ))}
+            </div>
+          ) : upcomingTrips.length > 0 ? (
+            <div className="grid gap-6">
+              {upcomingTrips.map(trip => (
+                <div 
+                  key={trip._id}
+                  onClick={() => navigate(`/trips/${trip._id}/view`)}
+                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row items-center gap-6 cursor-pointer hover:shadow-md transition-shadow group"
+                >
+                  <div className="w-full sm:w-48 h-32 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 relative">
+                    {trip.coverPhoto ? (
+                      <img src={trip.coverPhoto} alt={trip.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <Map className="w-10 h-10" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 w-full">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{trip.title}</h3>
+                      <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-md font-semibold">Upcoming</span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4">
+                      <div className="flex items-center"><Clock className="w-4 h-4 mr-1" /> {formatDate(trip.startDate)}</div>
+                      <div className="flex items-center"><MapPin className="w-4 h-4 mr-1" /> {trip.destinations?.length || 0} Stops</div>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div className="bg-indigo-500 h-2 rounded-full" style={{ width: '25%' }}></div>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2 text-right">Planning Progress</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 text-center flex flex-col items-center justify-center h-full min-h-[300px]">
+              <div className="bg-indigo-50 p-4 rounded-full mb-4">
+                <Compass className="w-12 h-12 text-indigo-400" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No upcoming trips</h3>
+              <p className="text-gray-500 mb-6 max-w-md">You don't have any future trips planned yet. Start dreaming and build your first itinerary!</p>
+              <button 
+                onClick={() => navigate('/trips/create')}
+                className="btn bg-indigo-600 text-white hover:bg-indigo-700"
+              >
+                Create a Trip
+              </button>
+            </div>
+          )}
+        </div>
 
-                {
-                  id: 2,
-                  message: 'Payment received',
-                  time: '15 minutes ago',
-                },
+        {/* Right Column - Quick Actions & Inspiration */}
+        <div className="space-y-8">
+          {/* Quick Explore */}
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+              <Compass className="w-5 h-5 mr-2 text-indigo-600" />
+              Explore Module
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <button 
+                onClick={() => navigate('/explore/cities')}
+                className="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-2xl hover:bg-indigo-50 hover:text-indigo-600 transition-colors border border-gray-100"
+              >
+                <MapPin className="w-8 h-8 mb-2 text-gray-400" />
+                <span className="font-medium text-sm">Find Cities</span>
+              </button>
+              <button 
+                onClick={() => navigate('/explore/activities')}
+                className="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-2xl hover:bg-indigo-50 hover:text-indigo-600 transition-colors border border-gray-100"
+              >
+                <Heart className="w-8 h-8 mb-2 text-gray-400" />
+                <span className="font-medium text-sm">Activities</span>
+              </button>
+            </div>
+          </div>
 
-                {
-                  id: 3,
-                  message: 'New support ticket',
-                  time: '1 hour ago',
-                },
-              ]
-            }
-          />
+          {/* Inspiration */}
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+              <MapPin className="w-5 h-5 mr-2 text-indigo-600" />
+              Recommended for you
+            </h3>
+            <div className="space-y-4">
+              {RECOMMENDED_CITIES.map(city => (
+                <div 
+                  key={city.name}
+                  onClick={() => navigate('/explore/cities', { state: { search: city.name } })}
+                  className="relative h-24 rounded-2xl overflow-hidden cursor-pointer group"
+                >
+                  <img src={city.image} alt={city.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                  <div className="absolute bottom-3 left-4 text-white">
+                    <p className="font-bold">{city.name}</p>
+                    <p className="text-xs text-gray-300">{city.country}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
-        }
-
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-
-        .animation-delay-6000 {
-          animation-delay: 6s;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(0, 0, 0, 0.05);
-          border-radius: 10px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: linear-gradient(
-            to bottom,
-            #8b5cf6,
-            #ec4899
-          );
-          border-radius: 10px;
-        }
-      `}</style>
     </div>
   );
 };

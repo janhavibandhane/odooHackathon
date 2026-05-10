@@ -4,6 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { CheckSquare, Square, Plus, Trash2, ArrowLeft, Package } from 'lucide-react';
 
+import { tripService } from '../../services/apiService';
+import TripTabs from '../../components/trips/TripTabs';
+
 const CATEGORIES = ['Clothing', 'Toiletries', 'Electronics', 'Documents', 'Other'];
 
 const PackingList = () => {
@@ -23,14 +26,10 @@ const PackingList = () => {
 
   const fetchTrip = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/trips/${id}`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      if (!response.ok) throw new Error('Failed to fetch trip data');
-      const data = await response.json();
+      const data = await tripService.getTripById(id);
       setTrip(data);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to fetch trip data');
     } finally {
       setIsLoading(false);
     }
@@ -38,19 +37,10 @@ const PackingList = () => {
 
   const savePackingList = async (newList) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/trips/${id}/packing`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`
-        },
-        body: JSON.stringify({ packingList: newList })
-      });
-      if (!response.ok) throw new Error('Failed to save packing list');
-      const data = await response.json();
+      const data = await tripService.updatePackingList(id, { packingList: newList });
       setTrip(data);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to save packing list');
     }
   };
 
@@ -103,12 +93,14 @@ const PackingList = () => {
   }, {});
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center mb-6">
-        <button onClick={() => navigate(`/trips/${id}/view`)} className="mr-4 text-gray-500 hover:text-gray-900 transition-colors">
-          <ArrowLeft className="w-6 h-6" />
-        </button>
-        <div>
+    <div className="bg-gray-50 min-h-screen">
+      <TripTabs />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center mb-6">
+          <button onClick={() => navigate(`/trips/${id}/view`)} className="mr-4 text-gray-500 hover:text-gray-900 transition-colors">
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <div>
           <h1 className="text-3xl font-bold text-gray-900">Packing List</h1>
           <p className="mt-1 text-sm text-gray-500">Get ready for {trip.title}</p>
         </div>
@@ -208,6 +200,7 @@ const PackingList = () => {
           })}
         </div>
       )}
+    </div>
     </div>
   );
 };

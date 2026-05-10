@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../context/AuthContext';
 
+import { tripService } from '../../services/apiService';
+
 const CreateTrip = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -14,20 +16,8 @@ const CreateTrip = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/trips', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify(data),
-      });
+      const result = await tripService.createTrip(data);
 
-      if (!response.ok) {
-        throw new Error('Failed to create trip');
-      }
-
-      const result = await response.json();
       toast.success('Trip created successfully!');
       navigate(`/trips/${result._id}/builder`);
     } catch (error) {

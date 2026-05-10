@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapPin, Calendar, Compass, Share2, Globe, Heart } from 'lucide-react';
 
+import { tripService } from '../../services/apiService';
+
 const SharedItinerary = () => {
   const { tripId } = useParams();
   const [trip, setTrip] = useState(null);
@@ -11,12 +13,10 @@ const SharedItinerary = () => {
   useEffect(() => {
     const fetchPublicTrip = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/api/trips/public/${tripId}`);
-        if (!response.ok) throw new Error('Trip not found or is private');
-        const data = await response.json();
+        const data = await tripService.getPublicTrip(tripId);
         setTrip(data);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || 'Trip not found or is private');
       } finally {
         setIsLoading(false);
       }

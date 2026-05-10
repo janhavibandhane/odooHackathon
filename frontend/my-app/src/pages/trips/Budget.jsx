@@ -4,6 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { DollarSign, PieChart, TrendingUp, Plus, Trash2, ArrowLeft } from 'lucide-react';
 
+import { tripService } from '../../services/apiService';
+import TripTabs from '../../components/trips/TripTabs';
+
 const CATEGORIES = ['Transport', 'Stay', 'Activities', 'Meals', 'Other'];
 const CATEGORY_COLORS = {
   'Transport': 'bg-blue-500',
@@ -31,17 +34,13 @@ const Budget = () => {
 
   const fetchTrip = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/trips/${id}`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      if (!response.ok) throw new Error('Failed to fetch trip data');
-      const data = await response.json();
+      const data = await tripService.getTripById(id);
       setTrip(data);
       if (data.budget && data.budget.totalBudget) {
         setTotalBudgetInput(data.budget.totalBudget.toString());
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to fetch trip data');
     } finally {
       setIsLoading(false);
     }
@@ -49,20 +48,11 @@ const Budget = () => {
 
   const saveBudget = async (budgetData) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/trips/${id}/budget`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`
-        },
-        body: JSON.stringify({ budget: budgetData })
-      });
-      if (!response.ok) throw new Error('Failed to update budget');
-      const data = await response.json();
+      const data = await tripService.updateBudget(id, { budget: budgetData });
       setTrip(data);
       toast.success('Budget updated successfully');
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to update budget');
     }
   };
 
@@ -129,18 +119,20 @@ const Budget = () => {
   }, {});
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center mb-6">
-        <button onClick={() => navigate(`/trips/${id}/view`)} className="mr-4 text-gray-500 hover:text-gray-900 transition-colors">
-          <ArrowLeft className="w-6 h-6" />
-        </button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Budget Tracker</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage expenses for {trip.title}</p>
+    <div className="bg-gray-50 min-h-screen">
+      <TripTabs />
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center mb-6">
+          <button onClick={() => navigate(`/trips/${id}/view`)} className="mr-4 text-gray-500 hover:text-gray-900 transition-colors">
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Budget Tracker</h1>
+            <p className="mt-1 text-sm text-gray-500">Manage expenses for {trip.title}</p>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Overview & Add Expense */}
         <div className="lg:col-span-1 space-y-6">
           {/* Total Budget Card */}
@@ -318,6 +310,7 @@ const Budget = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { User, Mail, Image as ImageIcon, Shield, Save } from 'lucide-react';
+import { authService } from '../../services/apiService';
 
 const ProfileSettings = () => {
   const { user, login } = useAuth(); // We might use login to update the user context
@@ -40,24 +41,12 @@ const ProfileSettings = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/auth/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-Authorization: 'Bearer ' + (user?.token || '')        },
-        body: JSON.stringify({
-          name: formData.name,
-          avatar: formData.avatar,
-          ...(formData.password && { password: formData.password })
-        })
+      const updatedUser = await authService.updateProfile({
+        name: formData.name,
+        avatar: formData.avatar,
+        ...(formData.password && { password: formData.password })
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update profile');
-      }
-
-      const updatedUser = await response.json();
       
       // Update local storage and context
       localStorage.setItem('user', JSON.stringify(updatedUser));

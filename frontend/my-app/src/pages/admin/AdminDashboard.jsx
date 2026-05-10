@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Users, Map, Activity, TrendingUp, ShieldAlert } from 'lucide-react';
 
+import { adminService } from '../../services/apiService';
+
 const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -20,13 +22,7 @@ const AdminDashboard = () => {
 
     const fetchAdminStats = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/dashboard/admin/stats', {
-          headers: { Authorization: `Bearer ${user.token}` }
-        });
-        
-        if (!response.ok) throw new Error('Failed to fetch admin stats');
-        
-        const data = await response.json();
+        const data = await adminService.getStats();
         setStats(data);
       } catch (error) {
         toast.error(error.message);
