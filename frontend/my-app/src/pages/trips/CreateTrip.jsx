@@ -133,6 +133,22 @@ const CreateTrip = () => {
                       placeholder="Briefly describe the purpose or vibe of your trip..."
                     />
                   </div>
+
+                  {/* Budget */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                      <Sparkles size={14} className="text-indigo-400"/> Total Budget (INR)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-6 top-5 text-gray-400 font-bold">₹</span>
+                      <input
+                        type="number"
+                        {...register('budget.totalBudget', { valueAsNumber: true })}
+                        className="w-full px-12 py-5 bg-gray-50 border border-gray-100 rounded-[2rem] text-sm font-bold text-gray-900 focus:bg-white focus:ring-4 focus:ring-indigo-50 focus:border-indigo-100 transition-all outline-none"
+                        placeholder="e.g. 50000"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="pt-6 flex items-center gap-6">

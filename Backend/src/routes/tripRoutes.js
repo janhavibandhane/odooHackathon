@@ -4,6 +4,7 @@ import {
   getMyTrips, 
   getTripById, 
   getPublicTrip,
+  shareTrip,
   updateTrip, 
   deleteTrip,
   cloneTrip,
@@ -30,6 +31,9 @@ router.route('/:id')
 
 router.route('/:id/clone')
   .post(protect, cloneTrip);
+
+router.route('/:id/share')
+  .put(protect, shareTrip);
 
 router.route('/:id/budget')
   .put(protect, updateTripBudget);

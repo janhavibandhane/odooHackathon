@@ -7,7 +7,7 @@ import Activity from '../model/Activity.js';
 // @access  Private
 export const createTrip = async (req, res, next) => {
   try {
-    const { title, description, startDate, endDate, coverPhoto } = req.body;
+    const { title, description, startDate, endDate, coverPhoto, budget } = req.body;
 
     if (!title || !startDate || !endDate) {
       res.status(400);
@@ -21,6 +21,7 @@ export const createTrip = async (req, res, next) => {
       startDate,
       endDate,
       coverPhoto,
+      budget: budget || { totalBudget: 0, expenses: [] }
     });
 
     res.status(201).json(trip);

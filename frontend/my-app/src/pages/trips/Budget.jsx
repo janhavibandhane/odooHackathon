@@ -157,10 +157,13 @@ const Budget = () => {
             <div className="flex flex-wrap gap-4">
               <div className="bg-indigo-50 px-6 py-3 rounded-2xl border border-indigo-100">
                 <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">Total Budget</p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <span className="text-2xl font-black text-indigo-900">₹{currentBudget.totalBudget.toLocaleString()}</span>
-                  <button onClick={() => document.getElementById('budget_modal').showModal()} className="text-indigo-400 hover:text-indigo-600">
-                    <TrendingUp size={18} />
+                  <button 
+                    onClick={() => document.getElementById('budget_modal').showModal()} 
+                    className="px-3 py-1 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+                  >
+                    Set Goal
                   </button>
                 </div>
               </div>
